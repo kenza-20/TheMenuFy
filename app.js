@@ -11,7 +11,7 @@ app.listen(port, () => {
 });
 
 const mongoose = require('mongoose');
-mongoose.connect('mongodb+srv://kenza:kenza2020@cluster0.65hm7.mongodb.net/themenufyretryWrites=true&w=majority&appName=Cluster0')
+mongoose.connect('mongodb+srv://kenza:kenza2020@cluster0.65hm7.mongodb.net/themenufy?retryWrites=true&w=majority&appName=Cluster0')
     .then(() => console.log('Connecté à MongoDB'))
     .catch(err => console.error('Erreur de connexion', err)
 );
