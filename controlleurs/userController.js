@@ -1,6 +1,7 @@
 const User = require('../models/userModel');
 const jwt = require('jsonwebtoken');
 const sendEmail = require('../emailService');
+require('dotenv').config();
 
 // Generate Token
 const createToken = (_id, role) => {
@@ -15,64 +16,101 @@ const signupUser = async (req, res) => {
     const { name, surname, email, password, confirmPassword, role } = req.body;
 
     try {
-        const user = await User.signup(name, surname, email, password, confirmPassword, role);
+        const approved = role !== 'restaurant'; // Auto-approve unless restaurant
+        const user = await User.signup(name, surname, email, password, confirmPassword, role, approved);
 
-        // If the user is a restaurant, they need admin approval
-        if (role === 'restaurant') {
+        // ✅ Generate token immediately, even if pending approval
+        const token = createToken(user._id, user.role);
+
+        if (role === 'restaurant' && !approved) {
             await sendEmail(email, "Approval Pending", 
-                `Hello ${name},\n\nYour account is pending approval from an admin. You'll receive an email once approved.\n\nBest regards,\nThemenufy Team`
+                `<h3>Hello ${name},</h3>
+                <p>Your account is pending admin approval. You'll receive an email once approved.</p>
+                <p>Best regards,<br><strong>Themenufy Team</strong></p>`
             );
+
             return res.status(201).json({ 
                 message: "Signup successful. Waiting for admin approval.", 
-                userId: user._id,  // ✅ Ensure userId is included 
+                token,  // ✅ Token is given even if pending
+                userId: user._id,  
                 role: user.role 
             });
         }
 
-        // Generate JWT token
-        const token = createToken(user._id, user.role);
-        res.status(200).json({ 
-            name, 
-            surname, 
-            email, 
-            role, 
-            token, 
-            userId: user._id // ✅ Include user ID in response
-        });
+        // ✅ Welcome Email for Regular Users
+        const loginUrl = `https://yourwebsite.com/login`; // Adjust to your login page URL
+        await sendEmail(email, "Welcome to Themenufy!", 
+            `<h3>Welcome, ${name}!</h3>
+            <p>We're excited to have you on board.</p>
+            <p>Click the button below to log in:</p>
+            <table cellspacing="0" cellpadding="0" border="0" align="center">
+                <tr>
+                    <td align="center" bgcolor="#007BFF" style="border-radius: 5px; padding: 10px;">
+                        <a href="${loginUrl}" target="_blank" 
+                           style="display: inline-block; font-size: 16px; font-weight: bold; color: #ffffff; text-decoration: none; background-color: #007BFF; padding: 10px 20px; border-radius: 5px;">
+                           Login
+                        </a>
+                    </td>
+                </tr>
+            </table>
+            <p>Best regards,<br><strong>Themenufy Team</strong></p>`     
+        );
+
+        res.status(200).json({ name, surname, email, role, token, userId: user._id });
 
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
 };
 
-
 // Admin Approves a Restaurant
 const approveRestaurant = async (req, res) => {
     const { userId } = req.params;
+    console.log("Received userId:", userId); // ✅ Debug log
 
     try {
-        const user = await User.findById(userId);
-        if (!user) {
-            return res.status(404).json({ error: "User not found" });
+        if (!req.user || (req.user.role !== 'admin' && req.user.role !== 'super_admin')) {
+            return res.status(403).json({ error: 'Access denied. Only admins can approve users.' });
         }
 
-        if (user.role !== 'restaurant') {
-            return res.status(400).json({ error: "Only restaurant users require approval" });
+        const user = await User.findById(userId);
+        console.log("User found in DB:", user); // ✅ Debug log
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
         }
 
         user.approved = true;
         await user.save();
 
-        // Send email notification to the restaurant
-        await sendEmail(user.email, "Account Approved", 
-            `Hello ${user.name},\n\nYour restaurant account has been approved! You can now log in.\n\nBest regards,\nThemenufy Team`
-        );
+        await sendEmail(user.email, "Welcome to Themenufy!", 
+            `<h3>Welcome, ${user.name}!</h3>
+            <p>Your restaurant has been approved!</p>
+            <p>Click below to log in:</p>
+            <a href="https://yourwebsite.com/login">Login</a>`);
 
-        res.status(200).json({ message: "Restaurant approved successfully" });
-
+        res.status(200).json({ message: 'User approved successfully' });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.error("Error approving user:", error);
+        res.status(500).json({ error: 'Server error' });
     }
 };
 
-module.exports = { signupUser, approveRestaurant };
+// Delete User Function
+const deleteUser = async (req, res) => {
+    const { userId } = req.params;
+
+    try {
+        const user = await User.findByIdAndDelete(userId);
+
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        res.status(200).json({ message: "User deleted successfully" });
+    } catch (error) {
+        res.status(500).json({ error: "Server error" });
+    }
+};
+
+module.exports = { signupUser, approveRestaurant, deleteUser };
