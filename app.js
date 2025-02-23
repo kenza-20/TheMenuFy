@@ -4,9 +4,14 @@ const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 const app = express();
 const port = 3000;
+const authRoute = require('./routes/authRoute');
+const cookieParser = require('cookie-parser');
+
+require('dotenv').config();
 
 
 app.use(express.json());
+app.use("/auth",authRoute)
 
 const userRoutes = require('./routes/user');
 const emailRoutes = require('./routes/email');  // Import the email routes
