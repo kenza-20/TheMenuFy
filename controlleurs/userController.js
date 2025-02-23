@@ -1,6 +1,6 @@
 const User = require('../models/userModel');
 const jwt = require('jsonwebtoken');
-const nodemailer = require('nodemailer');
+const sendEmail = require('../emailService');
 
 // Generate Token
 const createToken = (_id, role) => {
@@ -10,53 +10,69 @@ const createToken = (_id, role) => {
     return jwt.sign({ _id, role }, process.env.SECRET, { expiresIn: '100d' });
 };
 
-// Send Email Function
-const sendTokenEmail = async (email, token) => {
-    try {
-        // Configure the email sender
-        let transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-                user: process.env.EMAIL_USER, // Your Gmail
-                pass: process.env.EMAIL_PASS  // Your App Password
-            }
-        });
-
-        // Email content
-        let mailOptions = {
-            from: process.env.EMAIL_USER,
-            to: email,
-            subject: "Your Admin Token",
-            text: `Hello,\n\nYour admin token for authentication is: ${token}\n\nUse this token for secure login.\n\nBest regards,\nThemenufy Team`
-        };
-
-        // Send email
-        await transporter.sendMail(mailOptions);
-        console.log("✅ Email sent successfully to", email);
-    } catch (error) {
-        console.error("❌ Error sending email:", error);
-    }
-};
-
 // Signup Function
 const signupUser = async (req, res) => {
-    const { email, password, confirmPassword, role } = req.body;
+    const { name, surname, email, password, confirmPassword, role } = req.body;
 
     try {
-        const user = await User.signup(email, password, confirmPassword, role);
+        const user = await User.signup(name, surname, email, password, confirmPassword, role);
+
+        // If the user is a restaurant, they need admin approval
+        if (role === 'restaurant') {
+            await sendEmail(email, "Approval Pending", 
+                `Hello ${name},\n\nYour account is pending approval from an admin. You'll receive an email once approved.\n\nBest regards,\nThemenufy Team`
+            );
+            return res.status(201).json({ 
+                message: "Signup successful. Waiting for admin approval.", 
+                userId: user._id,  // ✅ Ensure userId is included 
+                role: user.role 
+            });
+        }
 
         // Generate JWT token
         const token = createToken(user._id, user.role);
+        res.status(200).json({ 
+            name, 
+            surname, 
+            email, 
+            role, 
+            token, 
+            userId: user._id // ✅ Include user ID in response
+        });
 
-        // If user is an admin, send token to restaurant via email
-        if (role === 'admin') {
-            await sendTokenEmail(email, token);
-        }
-
-        res.status(200).json({ email, role, token });
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
 };
 
-module.exports = { signupUser };
+
+// Admin Approves a Restaurant
+const approveRestaurant = async (req, res) => {
+    const { userId } = req.params;
+
+    try {
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        if (user.role !== 'restaurant') {
+            return res.status(400).json({ error: "Only restaurant users require approval" });
+        }
+
+        user.approved = true;
+        await user.save();
+
+        // Send email notification to the restaurant
+        await sendEmail(user.email, "Account Approved", 
+            `Hello ${user.name},\n\nYour restaurant account has been approved! You can now log in.\n\nBest regards,\nThemenufy Team`
+        );
+
+        res.status(200).json({ message: "Restaurant approved successfully" });
+
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+module.exports = { signupUser, approveRestaurant };
