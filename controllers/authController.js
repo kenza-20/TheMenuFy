@@ -1,0 +1,76 @@
+const User = require('../models/User'); // Adapté selon le chemin et le nom de ton modèle
+const bcrypt = require('bcrypt');       // Pour la vérification du mot de passe
+const jwt = require('jsonwebtoken');      // Pour générer le token
+
+module.exports.login_post = async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    // Récupérer l'utilisateur par email
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: 'Utilisateur non trouvé.' });
+    }
+    
+    // Vérifier si l'utilisateur est validé et confirmé
+    if (user.role === 'resto' || user.validated === false) {
+      return res.status(403).json({ message: "Connexion refusée. Il faut attendre la validation du compte." });
+    }
+
+    if (user.confirmed === false) {
+      return res.status(403).json({ message: "Connexion refusée. Vous devez confirmer votre compte." });
+    }
+
+    // Comparer le mot de passe envoyé avec celui stocké dans la DB
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Mot de passe incorrect.' });
+    }
+
+    // Générer un token JWT
+    const token = jwt.sign(
+      { id: user._id, email: user.email, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+
+    // Répondre avec le token
+    res.json({
+      message: 'Connexion réussie.',
+      token,
+      id: user._id,
+      email: user.email,
+      role: user.role
+    });
+    
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+};
+
+
+// module.exports.addUser = async (req, res) => {
+//   try {
+//     const { email, pwd, role, validated,confirmed } = req.body;
+//     const newUser = new User({ email, pwd, role, validated,confirmed });
+//     const savedUser = await newUser.save();
+//     res.status(201).json(savedUser);
+//   } catch (error) {
+//     console.error("Erreur lors de l'ajout de l'utilisateur :", error);
+//     res.status(500).json({ error: 'Erreur serveur' });
+//   }
+// };
+
+const blacklist = new Set();
+module.exports.logout = (req, res) => {
+  const token = req.headers.authorization?.split(" ")[1]; // Récupérer le token
+
+  if (!token) {
+    return res.status(400).json({ message: "Token manquant." });
+  }
+
+  blacklist.add(token); // Ajouter à la blacklist
+  res.json({ message: "Déconnexion réussie." });
+};
+

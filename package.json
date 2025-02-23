@@ -5,10 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-     "start": "node app.js",
-     "dev": "nodemon app.js"
+    "start": "node app.js",
+    "dev": "nodemon app.js"
   },
-  
   "repository": {
     "type": "git",
     "url": "git+https://github.com/kenza-20/TheMenuFy.git"
@@ -21,8 +20,13 @@
   },
   "homepage": "https://github.com/kenza-20/TheMenuFy#readme",
   "dependencies": {
+    "bcrypt": "^5.1.1",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^16.4.7",
     "express": "^4.21.2",
-    "mongoose": "^8.10.1"
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.10.1",
+    "yup": "^1.6.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.9"
