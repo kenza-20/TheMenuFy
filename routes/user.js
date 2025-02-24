@@ -7,6 +7,8 @@ const userModel = require('../models/userModel');
 const router = express.Router();
 
 router.post('/signup',validateUser, signupUser);
+router.post('/login',validateUser.validate, authController.login_post);
+router.post("/logout", authController.logout);
 
 // ✅ Route pour confirmer l'email en utilisant l'ID utilisateur
 router.get("/confirm/:id", async (req, res) => {

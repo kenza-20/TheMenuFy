@@ -5,6 +5,8 @@ const jwt = require('jsonwebtoken');
 const app = express();
 const port = 3000;
 const authRoute = require('./routes/authRoute');
+const superAdminRoute = require('./routes/superAdminRoutes');
+
 const cookieParser = require('cookie-parser');
 
 require('dotenv').config();
@@ -12,6 +14,8 @@ require('dotenv').config();
 
 app.use(express.json());
 app.use("/auth",authRoute)
+app.use("/superAdmin",superAdminRoute)
+
 
 const userRoutes = require('./routes/user');
 const emailRoutes = require('./routes/email');  // Import the email routes

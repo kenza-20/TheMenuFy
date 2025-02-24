@@ -6,7 +6,6 @@ const router = Router();
 
 
 router.post('/login',validate, authController.login_post);
-router.post('/add', authController.addUser);
 router.post("/logout", authController.logout);
 
 
