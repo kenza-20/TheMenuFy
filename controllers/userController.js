@@ -1,6 +1,6 @@
-const User = require('../models/User'); // Adapté selon le chemin et le nom de ton modèle
-const bcrypt = require('bcrypt');       // Pour la vérification du mot de passe
-const jwt = require('jsonwebtoken');      // Pour générer le token
+const User = require('../models/User'); 
+const bcrypt = require('bcrypt');      
+const jwt = require('jsonwebtoken');      
 
 module.exports.login_post = async (req, res) => {
   const { email, password } = req.body;
@@ -13,7 +13,7 @@ module.exports.login_post = async (req, res) => {
     }
     
     // Vérifier si l'utilisateur est validé et confirmé
-    if (user.role === 'resto' || user.validated === false) {
+    if (user.role === 'restaurant' || user.approved === false) {
       return res.status(403).json({ message: "Connexion refusée. Il faut attendre la validation du compte." });
     }
 
@@ -27,21 +27,23 @@ module.exports.login_post = async (req, res) => {
       return res.status(401).json({ message: 'Mot de passe incorrect.' });
     }
 
-    // Générer un token JWT
-    const token = jwt.sign(
-      { id: user._id, email: user.email, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: '1h' }
-    );
-
-    // Répondre avec le token
-    res.json({
-      message: 'Connexion réussie.',
-      token,
-      id: user._id,
-      email: user.email,
-      role: user.role
-    });
+      // Générer un token JWT
+      const token = jwt.sign(
+        { id: user._id, email: user.email, role: user.role },
+        process.env.JWT_SECRET,
+        { expiresIn: '1h' }
+      );
+  
+      // Réponse avec le token
+      res.json({
+        message: 'Connexion réussie.',
+        token,
+        user: {
+          id: user._id,
+          email: user.email,
+          role: user.role
+        }
+      });
     
   } catch (err) {
     console.error(err);
@@ -50,17 +52,7 @@ module.exports.login_post = async (req, res) => {
 };
 
 
-// module.exports.addUser = async (req, res) => {
-//   try {
-//     const { email, pwd, role, validated,confirmed } = req.body;
-//     const newUser = new User({ email, pwd, role, validated,confirmed });
-//     const savedUser = await newUser.save();
-//     res.status(201).json(savedUser);
-//   } catch (error) {
-//     console.error("Erreur lors de l'ajout de l'utilisateur :", error);
-//     res.status(500).json({ error: 'Erreur serveur' });
-//   }
-// };
+
 
 const blacklist = new Set();
 module.exports.logout = (req, res) => {
