@@ -27,17 +27,15 @@ module.exports.login_post = async (req, res) => {
       return res.status(401).json({ message: 'Mot de passe incorrect.' });
     }
 
-    // Générer un token JWT
-    const token = jwt.sign(
-      { id: user._id, email: user.email, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: '1h' }
-    );
+    // Vérifier si un token existe dans la base de données
+    if (!user.token) {
+      return res.status(500).json({ message: "Aucun token trouvé. Veuillez réinitialiser votre compte." });
+    }
 
-    // Répondre avec le token
+    // Retourner le token existant
     res.json({
       message: 'Connexion réussie.',
-      token,
+      token: user.token,  // Utilisation du token existant
       id: user._id,
       email: user.email,
       role: user.role
@@ -50,17 +48,7 @@ module.exports.login_post = async (req, res) => {
 };
 
 
-// module.exports.addUser = async (req, res) => {
-//   try {
-//     const { email, pwd, role, validated,confirmed } = req.body;
-//     const newUser = new User({ email, pwd, role, validated,confirmed });
-//     const savedUser = await newUser.save();
-//     res.status(201).json(savedUser);
-//   } catch (error) {
-//     console.error("Erreur lors de l'ajout de l'utilisateur :", error);
-//     res.status(500).json({ error: 'Erreur serveur' });
-//   }
-// };
+
 
 const blacklist = new Set();
 module.exports.logout = (req, res) => {
