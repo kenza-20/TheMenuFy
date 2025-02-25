@@ -2,6 +2,8 @@ const express = require('express');
 const { signupUser } = require('../controlleurs/userController');
 const validateUser = require('../middleware/validateUser');
 const userModel = require('../models/userModel');
+const authController = require('../controlleurs/userController');
+
 
 
 const router = express.Router();
@@ -33,6 +35,12 @@ router.get("/confirm/:id", async (req, res) => {
         res.status(500).json({ error: "Something went wrong" });
     }
 });
+
+// Route pour demander la réinitialisation du mot de passe
+router.post('/forgot-password', authController.forgotPassword);
+
+// Route pour réinitialiser le mot de passe
+router.post('/reset-password', authController.resetPassword);
 
 
 module.exports = router;

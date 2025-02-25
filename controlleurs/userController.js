@@ -3,6 +3,9 @@ const jwt = require('jsonwebtoken');
 const validator = require("validator");
 const bcrypt = require('bcrypt');
 const sendEmail = require('../emailService');
+const crypto = require('crypto');
+const nodemailer = require('nodemailer');
+
 require('dotenv').config();
 
 // Generate Token
@@ -91,4 +94,82 @@ const signupUser = async (req, res) => {
     }
 };
 
-module.exports = { signupUser};
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: process.env.EMAIL_USER,   
+        pass: process.env.EMAIL_PASS   
+    }
+});
+
+
+// Fonction pour demander la réinitialisation du mot de passe
+const forgotPassword = async (req, res) => {
+    const { email } = req.body;
+
+    try {
+        // Vérifier si l'email existe dans la base de données
+        const user = await User.findOne({ email });
+        if (!user) {
+            console.log('User not found');
+            return res.status(400).json({ error: 'Email not found' });
+        }
+
+        // Générer un code de réinitialisation
+        const resetCode = crypto.randomBytes(3).toString('hex'); // Code de 6 caractères
+
+        // Enregistrer le code dans l'utilisateur (dans un champ temporaire)
+        user.resetCode = resetCode;
+        user.resetCodeExpiration = Date.now() + 3600000; // Le code expire dans 1 heure
+        await user.save();
+
+        // Envoyer un email avec le code de réinitialisation
+        const mailOptions = {
+            from: process.env.EMAIL_USER,
+            to: email,
+            subject: 'Password Reset Code',
+            html: `
+                <h3>Password Reset Request</h3>
+                <p>We received a request to reset your password.</p>
+                <p>Your reset code is: <strong>${resetCode}</strong></p>
+                <p>If you didn't request a password reset, please ignore this email.</p>
+            `
+        };
+
+        await transporter.sendMail(mailOptions);
+
+        res.status(200).json({ message: 'Reset code sent to your email' });
+    } catch (error) {
+        console.error('Error during password reset process:', error);
+        res.status(500).json({ error: 'Something went wrong' });
+    }
+};
+
+// Fonction pour réinitialiser le mot de passe
+const resetPassword = async (req, res) => {
+    const { resetCode, newPassword } = req.body;
+
+    try {
+        // Vérifier si le code est valide et non expiré
+        const user = await User.findOne({ resetCode, resetCodeExpiration: { $gt: Date.now() } });
+        if (!user) {
+            return res.status(400).json({ error: 'Invalid or expired reset code' });
+        }
+
+        // Hacher le nouveau mot de passe
+        const hashedPassword = await bcrypt.hash(newPassword, 10);  // Le "10" représente le nombre de "salts rounds"
+
+        // Mettre à jour le mot de passe de l'utilisateur
+        user.password = hashedPassword;
+        user.resetCode = undefined; // Effacer le code de réinitialisation
+        user.resetCodeExpiration = undefined; // Effacer l'expiration du code
+        await user.save();
+
+        res.status(200).json({ message: 'Password reset successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Something went wrong' });
+    }
+};
+
+module.exports = { signupUser,forgotPassword,resetPassword};
