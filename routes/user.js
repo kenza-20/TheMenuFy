@@ -1,31 +1,38 @@
 const express = require('express');
-const { signupUser, approveRestaurant } = require('../controlleurs/userController');
-const requireAuth = require('../middleware/requireAuth'); // ✅ Corrected import
-const User = require('../models/userModel'); // ✅ Import User model
+const { signupUser } = require('../controlleurs/userController');
+const validateUser = require('../middleware/validateUser');
+const userModel = require('../models/userModel');
+
 
 const router = express.Router();
 
-router.post('/signup', signupUser);
+router.post('/signup',validateUser, signupUser);
 
-// ✅ If `approveRestaurant` handles approval logic, just use it
-router.patch('/approve/:userId', requireAuth, approveRestaurant);
-router.delete('/', async (req, res) => {
+// ✅ Route pour confirmer l'email en utilisant l'ID utilisateur
+router.get("/confirm/:id", async (req, res) => {
     try {
-        const { email } = req.body; // Extract email from request body
+        const { id } = req.params;
 
-        if (!email) {
-            return res.status(400).json({ message: "Email is required" });
-        }
-
-        const user = await User.findOneAndDelete({ email });
-
+        // Trouver l'utilisateur par ID
+        const user = await userModel.findById(id);
         if (!user) {
-            return res.status(404).json({ message: "User not found" });
+            return res.status(400).json({ error: "Invalid confirmation link" });
         }
 
-        res.status(200).json({ message: "User deleted successfully" });
+        // Vérifier si l'utilisateur est déjà confirmé
+        if (user.confirmed) {
+            return res.status(200).json({ message: "Your account is already confirmed" });
+        }
+
+        // ✅ Confirmer l'utilisateur
+        user.confirmed = true;
+        await user.save();
+
+        res.status(200).send(`<h2>Your email has been confirmed! You can now     log in.</h2>`);
     } catch (error) {
-        res.status(500).json({ message: "Error deleting user", error });
+        res.status(500).json({ error: "Something went wrong" });
     }
 });
+
+
 module.exports = router;

@@ -1,5 +1,7 @@
 const User = require('../models/userModel');
 const jwt = require('jsonwebtoken');
+const validator = require("validator");
+const bcrypt = require('bcrypt');
 const sendEmail = require('../emailService');
 require('dotenv').config();
 
@@ -11,17 +13,41 @@ const createToken = (_id, role) => {
     return jwt.sign({ _id, role }, process.env.SECRET, { expiresIn: '100d' });
 };
 
-// Signup Function
 const signupUser = async (req, res) => {
-    const { name, surname, email, password, confirmPassword, role } = req.body;
+    const { name, surname, email, password, role } = req.body;
 
     try {
-        const approved = role !== 'restaurant'; // Auto-approve unless restaurant
-        const user = await User.signup(name, surname, email, password, confirmPassword, role, approved);
+        // 🔍 Validation des champs
+        if (!name || !surname || !email || !password ||  !role) {
+            throw new Error('All fields must be filled');
+        }
+        if (!validator.isEmail(email)) {
+            throw new Error('Email not valid');
+        }
+        if (!validator.isStrongPassword(password)) {
+            throw new Error('Password must be at least 8 characters long, with uppercase, lowercase, number, and symbol');
+        }
 
-        // ✅ Generate token immediately, even if pending approval
+        // 🔍 Vérification si l'email existe déjà
+        const exists = await User.findOne({ email });
+        if (exists) {
+            throw new Error('Email already in use');
+        }
+
+        // 🔑 Hash du mot de passe
+        const salt = await bcrypt.genSalt(10);
+        const hash = await bcrypt.hash(password, salt);
+
+        // ✅ Création de l'utilisateur
+        const approved = role !== 'restaurant'; // Auto-approve unless restaurant
+        const confirmed = false; // Confirmed par défaut à false
+
+        const user = await User.create({ name, surname, email, password: hash, role, approved,confirmed });
+
+        // 🎟 Génération du Token
         const token = createToken(user._id, user.role);
 
+        // 📩 Notification par email
         if (role === 'restaurant' && !approved) {
             await sendEmail(email, "Approval Pending", 
                 `<h3>Hello ${name},</h3>
@@ -31,14 +57,16 @@ const signupUser = async (req, res) => {
 
             return res.status(201).json({ 
                 message: "Signup successful. Waiting for admin approval.", 
-                token,  // ✅ Token is given even if pending
+                token,
                 userId: user._id,  
                 role: user.role 
             });
         }
 
-        // ✅ Welcome Email for Regular Users
-        const loginUrl = `https://yourwebsite.com/login`; // Adjust to your login page URL
+        res.status(200).json({ name, surname, email, role, token, userId: user._id, confirmed: user.confirmed});
+
+        // ✅ Envoi d'un email de bienvenue aux utilisateurs approuvés
+        const loginUrl = `http://localhost:3000/api/user/confirm/${user._id}`;
         await sendEmail(email, "Welcome to Themenufy!", 
             `<h3>Welcome, ${name}!</h3>
             <p>We're excited to have you on board.</p>
@@ -48,7 +76,7 @@ const signupUser = async (req, res) => {
                     <td align="center" bgcolor="#007BFF" style="border-radius: 5px; padding: 10px;">
                         <a href="${loginUrl}" target="_blank" 
                            style="display: inline-block; font-size: 16px; font-weight: bold; color: #ffffff; text-decoration: none; background-color: #007BFF; padding: 10px 20px; border-radius: 5px;">
-                           Login
+                           confirmer
                         </a>
                     </td>
                 </tr>
@@ -56,61 +84,11 @@ const signupUser = async (req, res) => {
             <p>Best regards,<br><strong>Themenufy Team</strong></p>`     
         );
 
-        res.status(200).json({ name, surname, email, role, token, userId: user._id });
+       
 
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
 };
 
-// Admin Approves a Restaurant
-const approveRestaurant = async (req, res) => {
-    const { userId } = req.params;
-    console.log("Received userId:", userId); // ✅ Debug log
-
-    try {
-        if (!req.user || (req.user.role !== 'admin' && req.user.role !== 'super_admin')) {
-            return res.status(403).json({ error: 'Access denied. Only admins can approve users.' });
-        }
-
-        const user = await User.findById(userId);
-        console.log("User found in DB:", user); // ✅ Debug log
-
-        if (!user) {
-            return res.status(404).json({ error: 'User not found' });
-        }
-
-        user.approved = true;
-        await user.save();
-
-        await sendEmail(user.email, "Welcome to Themenufy!", 
-            `<h3>Welcome, ${user.name}!</h3>
-            <p>Your restaurant has been approved!</p>
-            <p>Click below to log in:</p>
-            <a href="https://yourwebsite.com/login">Login</a>`);
-
-        res.status(200).json({ message: 'User approved successfully' });
-    } catch (error) {
-        console.error("Error approving user:", error);
-        res.status(500).json({ error: 'Server error' });
-    }
-};
-
-// Delete User Function
-const deleteUser = async (req, res) => {
-    const { userId } = req.params;
-
-    try {
-        const user = await User.findByIdAndDelete(userId);
-
-        if (!user) {
-            return res.status(404).json({ error: "User not found" });
-        }
-
-        res.status(200).json({ message: "User deleted successfully" });
-    } catch (error) {
-        res.status(500).json({ error: "Server error" });
-    }
-};
-
-module.exports = { signupUser, approveRestaurant, deleteUser };
+module.exports = { signupUser};
