@@ -3,7 +3,7 @@ const yup=require('yup')
 async function validate(req, res, next) {
     try {
         const Schema = yup.object().shape({
-            pwd: yup.string().required(),
+            password: yup.string().required(),
             email: yup.string().email().required(),
         });
         await Schema.validate(req.body);

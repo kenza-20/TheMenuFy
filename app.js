@@ -2,6 +2,8 @@ const express = require('express');
 const app = express();
 const port = 3000;
 const authRoute = require('./routes/authRoute');
+const superAdminRoute = require('./routes/superAdminRoutes');
+
 const cookieParser = require('cookie-parser');
 
 require('dotenv').config();
@@ -9,6 +11,8 @@ require('dotenv').config();
 // Middleware pour parser le JSON
 app.use(express.json());
 app.use("/auth",authRoute)
+app.use("/superAdmin",superAdminRoute)
+
 
 // Lancement du serveur
 app.listen(port, () => {

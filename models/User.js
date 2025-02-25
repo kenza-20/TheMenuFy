@@ -5,8 +5,9 @@ const User = new Schema ({
     email: String , 
     password: String , 
     role:String,
-    validated:Boolean,
-    confirmed:Boolean
+    app:Boolean,
+    confirmed:Boolean,
+    isBlocked:Boolean
 
 })
 module.exports=mongo.model('user' , User);

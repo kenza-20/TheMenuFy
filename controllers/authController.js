@@ -27,19 +27,23 @@ module.exports.login_post = async (req, res) => {
       return res.status(401).json({ message: 'Mot de passe incorrect.' });
     }
 
-    // Vérifier si un token existe dans la base de données
-    if (!user.token) {
-      return res.status(500).json({ message: "Aucun token trouvé. Veuillez réinitialiser votre compte." });
-    }
-
-    // Retourner le token existant
-    res.json({
-      message: 'Connexion réussie.',
-      token: user.token,  // Utilisation du token existant
-      id: user._id,
-      email: user.email,
-      role: user.role
-    });
+      // Générer un token JWT
+      const token = jwt.sign(
+        { id: user._id, email: user.email, role: user.role },
+        process.env.JWT_SECRET,
+        { expiresIn: '1h' }
+      );
+  
+      // Réponse avec le token
+      res.json({
+        message: 'Connexion réussie.',
+        token,
+        user: {
+          id: user._id,
+          email: user.email,
+          role: user.role
+        }
+      });
     
   } catch (err) {
     console.error(err);
