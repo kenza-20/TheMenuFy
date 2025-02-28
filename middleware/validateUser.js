@@ -13,4 +13,4 @@ async function validate(req, res, next) {
     }
 }
 
-module.exports=validate
+module.exports=validateUser

@@ -1,6 +1,6 @@
-const User = require('../models/User'); // Adapté selon le chemin et le nom de ton modèle
-const bcrypt = require('bcrypt');       // Pour la vérification du mot de passe
-const jwt = require('jsonwebtoken');      // Pour générer le token
+const User = require('../models/User'); 
+const bcrypt = require('bcrypt');      
+const jwt = require('jsonwebtoken');      
 
 module.exports.login_post = async (req, res) => {
   const { email, password } = req.body;
@@ -13,7 +13,7 @@ module.exports.login_post = async (req, res) => {
     }
     
     // Vérifier si l'utilisateur est validé et confirmé
-    if (user.role === 'resto' || user.validated === false) {
+    if (user.role === 'restaurant' || user.approved === false) {
       return res.status(403).json({ message: "Connexion refusée. Il faut attendre la validation du compte." });
     }
 
