@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const {updateProfileAndPassword,updatePassword,addAdmin,updateAdmin,deleteAdmin,getAllAdmins,blockAdmin,unblockAdmin} = require('../controllers/superAdminController');
+const {updateProfileAndPassword,addAdmin,updateAdmin,deleteAdmin,getAllAdmins,blockAdmin,unblockAdmin} = require('../controlleurs/superAdminController');
 
 // Middleware pour vérifier que l'utilisateur est authentifié et un superadmin
-const { isSuperAdmin } = require('../middl/roleMiddleware');
+const { isSuperAdmin } = require('../middleware/roleMiddleware');
 
 // Routes pour le superadmin
 router.put('/profile',  updateProfileAndPassword);

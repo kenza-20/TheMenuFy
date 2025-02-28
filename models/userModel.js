@@ -11,7 +11,9 @@ const userSchema = new Schema({
   password: { type: String, required: true },
   role: { type: String, enum: ['super_admin', 'admin', 'kitchen', 'restaurant', 'client'], required: true },
   approved: { type: Boolean, default: false },
-  confirmed: { type: Boolean, default: false }
+  confirmed: { type: Boolean, default: false },
+  isBlocked: { type: Boolean, default: false }
+
 
 });
 

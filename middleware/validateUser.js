@@ -1,5 +1,5 @@
 const validator = require('validator');
-const yup=require('yup')
+const yup = require('yup');
 
 const validateUser = (req, res, next) => {
   const { name, surname, email, password, role } = req.body;
@@ -18,22 +18,21 @@ const validateUser = (req, res, next) => {
     });
   }
 
-  
-  next(); // Passe au middleware suivant si tout est valide
+  next();
 };
 
-async function validate(req, res, next) {
+const validateLogin = async (req, res, next) => {
   try {
-      const Schema = yup.object().shape({
-          password: yup.string().required(),
-          email: yup.string().email().required(),
-      });
-      await Schema.validate(req.body);
-      next(); // Ensure the request proceeds to the next middleware
+    const Schema = yup.object().shape({
+      email: yup.string().email().required(),
+      password: yup.string().required(),
+    });
+
+    await Schema.validate(req.body);
+    next();
   } catch (err) {
-      res.status(400).json({ error: err.errors || "Validation failed" });
+    res.status(400).json({ error: err.errors || "Validation failed" });
   }
-}
+};
 
-
-module.exports = {validateUser,validate};
+module.exports = { validateUser, validateLogin };

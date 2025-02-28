@@ -1,14 +1,18 @@
 const express = require('express');
-const { signupUser } = require('../controlleurs/userController');
-const validateUser = require('../middleware/validateUser');
+const {validateUser,validateLogin} = require('../middleware/validateUser');
 const userModel = require('../models/userModel');
-
-
+const userController = require('../controlleurs/userController');
 const router = express.Router();
 
-router.post('/signup',validateUser, signupUser);
-router.post('/login',validateUser.validate, authController.login_post);
-router.post("/logout", authController.logout);
+
+router.post('/signup',validateUser, userController.signupUser);
+router.post('/login',validateLogin,userController.login_post);
+router.post("/logout", userController.logout);
+// Route pour demander la réinitialisation du mot de passe
+router.post('/forgot-password', userController.forgotPassword);
+
+// Route pour réinitialiser le mot de passe
+router.post('/reset-password', userController.resetPassword);
 
 // ✅ Route pour confirmer l'email en utilisant l'ID utilisateur
 router.get("/confirm/:id", async (req, res) => {

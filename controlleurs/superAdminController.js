@@ -1,5 +1,5 @@
 // controllers/superAdminController.js
-const User = require('../models/User');
+const User = require('../models/userModel');
 const bcrypt = require('bcrypt');
 
 exports.updateProfileAndPassword = async (req, res) => {
