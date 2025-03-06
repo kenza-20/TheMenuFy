@@ -1,4 +1,3 @@
-// src/components/admin/EditUser.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
@@ -60,55 +59,68 @@ const EditUser = () => {
   if (!user) return <div>Chargement...</div>;  // Afficher un message de chargement si l'utilisateur n'est pas encore récupéré
 
   return (
-    <div>
-      <h2>Modifier l'utilisateur</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="max-w-lg mx-auto mt-10 p-8 bg-gradient-to-r from-green-400 via-teal-500 to-blue-600 shadow-xl rounded-lg">
+      <h2 className="text-3xl font-semibold text-white mb-6 text-center">Modifier l'utilisateur</h2>
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Nom */}
         <div>
-          <label htmlFor="name" className="block">Nom</label>
+          <label htmlFor="name" className="block text-lg font-medium text-white">Nom</label>
           <input
             type="text"
             id="name"
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
-            className="border border-gray-300 p-2 w-full"
+            className="border border-white p-3 w-full rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
           />
         </div>
+
+        {/* Email */}
         <div>
-          <label htmlFor="email" className="block">Email</label>
+          <label htmlFor="email" className="block text-lg font-medium text-white">Email</label>
           <input
             type="email"
             id="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="border border-gray-300 p-2 w-full"
+            className="border border-white p-3 w-full rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
           />
         </div>
+
+        {/* Mot de passe */}
         <div>
-          <label htmlFor="password" className="block">Mot de passe</label>
+          <label htmlFor="password" className="block text-lg font-medium text-white">Mot de passe</label>
           <input
             type="password"
             id="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="border border-gray-300 p-2 w-full"
+            className="border border-white p-3 w-full rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
           />
         </div>
+
+        {/* Rôle */}
         <div>
-          <label htmlFor="role" className="block">Rôle</label>
+          <label htmlFor="role" className="block text-lg font-medium text-white">Rôle</label>
           <select
             id="role"
             value={role}
             onChange={(e) => setRole(e.target.value)}
-            className="border border-gray-300 p-2 w-full"
+            className="border border-white p-3 w-full rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
           >
             <option value="user">Utilisateur</option>
             <option value="admin">Administrateur</option>
           </select>
         </div>
-        <button type="submit" className="bg-blue-500 text-white p-2 rounded mt-4">
-          Modifier
+
+        {/* Bouton submit */}
+        <button 
+          type="submit" 
+          className="w-full py-3 mt-4 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          Modifier l'utilisateur
         </button>
       </form>
     </div>
