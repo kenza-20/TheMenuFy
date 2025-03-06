@@ -1,7 +1,10 @@
-const User = require('../models/User'); // Adapté selon le chemin et le nom de ton modèle
-const bcrypt = require('bcrypt');       // Pour la vérification du mot de passe
-const jwt = require('jsonwebtoken');      // Pour générer le token
+const User = require('../models/User'); // Modèle User
+const bcrypt = require('bcrypt'); // Pour la vérification du mot de passe
+const jwt = require('jsonwebtoken'); // Pour générer le token
 
+const blacklist = new Set(); // Liste des tokens invalidés
+
+// Connexion utilisateur
 module.exports.login_post = async (req, res) => {
   const { email, password } = req.body;
 
@@ -11,7 +14,7 @@ module.exports.login_post = async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: 'Utilisateur non trouvé.' });
     }
-    
+
     // Vérifier si l'utilisateur est validé et confirmé
     if (user.role === 'resto' || user.validated === false) {
       return res.status(403).json({ message: "Connexion refusée. Il faut attendre la validation du compte." });
@@ -32,25 +35,27 @@ module.exports.login_post = async (req, res) => {
       return res.status(500).json({ message: "Aucun token trouvé. Veuillez réinitialiser votre compte." });
     }
 
+    // Vérifier si le token est sur la blacklist (déjà déconnecté)
+    if (blacklist.has(user.token)) {
+      return res.status(403).json({ message: "Session expirée, veuillez vous reconnecter." });
+    }
+
     // Retourner le token existant
     res.json({
       message: 'Connexion réussie.',
-      token: user.token,  // Utilisation du token existant
+      token: user.token, // Utilisation du token existant
       id: user._id,
       email: user.email,
       role: user.role
     });
-    
+
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
-
-
-
-const blacklist = new Set();
+// Déconnexion utilisateur
 module.exports.logout = (req, res) => {
   const token = req.headers.authorization?.split(" ")[1]; // Récupérer le token
 
@@ -58,7 +63,7 @@ module.exports.logout = (req, res) => {
     return res.status(400).json({ message: "Token manquant." });
   }
 
-  blacklist.add(token); // Ajouter à la blacklist
+  // Ajouter à la blacklist
+  blacklist.add(token);
   res.json({ message: "Déconnexion réussie." });
 };
-
