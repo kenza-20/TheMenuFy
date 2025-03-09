@@ -29,16 +29,32 @@ router.post('/', async (req, res) => {
         res.status(400).json(err);
     }
 });
+// Récupérer un utilisateur par ID
+router.get('/:id', async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+        if (!user) {
+            return res.status(404).json({ message: "Utilisateur non trouvé" });
+        }
+        res.json(user);
+    } catch (err) {
+        res.status(500).json({ message: "Erreur serveur", error: err });
+    }
+});
 
 // Modifier un utilisateur
 router.put('/:id', async (req, res) => {
     try {
         const updatedUser = await User.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        if (!updatedUser) {
+            return res.status(404).json({ message: "Utilisateur non trouvé" });
+        }
         res.json(updatedUser);
     } catch (err) {
-        res.status(400).json(err);
+        res.status(500).json({ message: "Erreur serveur", error: err });
     }
 });
+
 
 // Bloquer un utilisateur
 router.put('/block/:id', async (req, res) => {
