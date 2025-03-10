@@ -34,5 +34,26 @@ const validateLogin = async (req, res, next) => {
     res.status(400).json({ error: err.errors || "Validation failed" });
   }
 };
+const validateUserr = async (req, res, next) => {
+  const token = req.headers.authorization;
 
-module.exports = { validateUser, validateLogin };
+  if (!token) {
+    return res.status(401).json({ message: "Access Denied. No token provided." });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await userModel.findById(decoded.id);
+    
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    req.user = user;
+    next();
+  } catch (error) {
+    res.status(400).json({ message: "Invalid Token" });
+  }
+};
+
+module.exports = { validateUser, validateLogin , validateUserr };

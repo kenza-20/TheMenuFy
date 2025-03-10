@@ -132,7 +132,7 @@ function Register() {
                     name="role"
                     value={formData.role}
                     onChange={handleChange}
-                    className="w-full p-3 rounded-lg border border-white/30 bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-white/60 transition"
+                    className="w-full p-3 rounded-lg border border-white/30 bg-white/10 backdrop-blur-md text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/60 transition"
                     required
                   >
                     <option value="client">Client</option>
@@ -146,7 +146,7 @@ function Register() {
               <ReCAPTCHA sitekey="6LetWOYqAAAAALRc270njFoPpfYh5JM8oPWEwRpQ" onChange={setRecaptchaToken} />
               <Button
                 type="submit"
-                className="w-full bg-yellow-500 text-white hover:bg-yellow-600 border-2 border-yellow-500 font-semibold py-3 px-6 rounded-full transition-all duration-300"
+                className="w-full bg-transparent hover:bg-yellow-500 text-yellow-500 hover:text-white border-2 border-yellow-500 font-semibold py-3 px-6 rounded-full transition-all duration-300"
               >
                 Create Account
               </Button>
