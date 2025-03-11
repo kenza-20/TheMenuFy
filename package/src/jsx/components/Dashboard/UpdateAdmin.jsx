@@ -46,7 +46,6 @@ const UpdateAdmin = ({ admins }) => {
             // Met à jour l'admin via la fonction editAdmin
             const updatedAdmin = await editAdmin(id, admin);
             if (updatedAdmin) {
-                console.log("Administrateur mis à jour avec succès :", updatedAdmin);
             }
         } catch (error) {
             console.error("Échec de la mise à jour de l'administrateur");

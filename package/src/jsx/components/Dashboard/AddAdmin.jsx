@@ -32,7 +32,6 @@ function AddAdmin() {
 
         try {
             const a=await addAdmin(newAdmin);
-            console.log("aaaa",a)
             alert("Administrateur ajouté avec succès !");
             navigate('/list-admin'); // Redirection après l'ajout
         } catch (error) {

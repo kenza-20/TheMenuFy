@@ -11,14 +11,15 @@ const UserManagement = () => {
   const activePag = useRef(0);
   const sort = 10;
   const [test, setTest] = useState(0);
-  const [filterStatus] = useState("all");
-  const [filterRole, setFilterRole] = useState("all");
-  const [sortOrder, setSortOrder] = useState("asc");
+
+
 
 
   useEffect(() => {
     fetchUsers();
   }, [test]);
+
+
 
   const fetchUsers = () => {
     fetch(API_URL)
@@ -50,42 +51,22 @@ const UserManagement = () => {
     navigate("/add-user");
   };
 
-  const filteredUsers = users
-    .filter((user) => {
-      if (filterStatus === "blocked") return user.isBlocked;
-      if (filterStatus === "unblocked") return !user.isBlocked;
-      return true;
-    })
-    .filter((user) => {
-      if (filterRole !== "all") return user.role === filterRole;
-      return true;
-    })
-    .sort((a, b) => {
-      if (sortOrder === "asc") {
-        return a.name.localeCompare(b.name);
-      } else {
-        return b.name.localeCompare(a.name);
-      }
-    });
-
-
   return (
     <>
 <div className="d-sm-flex mb-lg-4 mb-2">
   {/* Filtres */}
   <div className="d-flex gap-3 ms-auto">
-    <Form.Select value={filterRole} onChange={(e) => setFilterRole(e.target.value)}>
-      <option value="all">Tous</option>
-      <option value="admin">Restaurant</option>
-      <option value="user">Client</option>
-      <option value="moderator">Cuisine</option>
-    </Form.Select>
+          <Form.Select>
+            <option value="all">Tous</option>
+            <option value="admin">Restaurant</option>
+            <option value="user">Client</option>
+            <option value="moderator">Cuisine</option>
+          </Form.Select>
 
-    {/* Bouton de tri */}
-    <button className="btn btn-secondary" onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}>
-      {sortOrder === "asc" ? <FaSortAlphaDown /> : <FaSortAlphaUp />}
-    </button>
-
+          {/* Bouton de tri */}
+          <button className="btn btn-secondary" >
+            <FaSortAlphaDown />
+          </button>
     <Button variant="primary" onClick={handleAddUser}>
       <FaPlus />
     </Button>

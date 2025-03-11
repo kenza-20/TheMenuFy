@@ -13,7 +13,7 @@ const AddUser = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const user = { name, email, password, role, isBlocked: false, validated: false, confirmed: false };
+    const user = { name, email, password, role};
 
     try {
       const response = await fetch(API_URL, {

@@ -3,7 +3,6 @@ import { useNavigate, useParams } from 'react-router-dom';
 
 const EditUser = () => {
   const { userId } = useParams();
-  console.log("User ID:", userId);  // Vérifie si l'ID est bien récupéré
   // Récupère l'ID de l'utilisateur dans l'URL
   const [user, setUser] = useState(null);
   const [name, setName] = useState('');

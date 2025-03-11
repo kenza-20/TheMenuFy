@@ -6,8 +6,7 @@ const EditUser = () => {
   const { userId } = useParams();
   const navigate = useNavigate();
 
-  // Vérifie que l'ID est bien récupéré
-  console.log("User ID récupéré depuis useParams():", userId);
+
 
   // Vérifie si l'ID est vide
   if (!userId) {
@@ -16,7 +15,6 @@ const EditUser = () => {
 
   // Déclare API_URL AVANT de l'utiliser
   const API_URL = `http://localhost:3000/api/users/${userId}`;
-  console.log("URL API utilisée :", API_URL);
 
   const [user, setUser] = useState(null);
   const [name, setName] = useState("");
@@ -26,18 +24,15 @@ const EditUser = () => {
   const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
-    console.log("🔍 Tentative de récupération des données utilisateur...");
 
     fetch(API_URL)
       .then((res) => {
-        console.log("📡 Réponse API:", res.status);
         if (!res.ok) {
           throw new Error("Utilisateur non trouvé");
         }
         return res.json();
       })
       .then((data) => {
-        console.log("✅ Données utilisateur récupérées :", data);
         setUser(data);
         setName(data.name);
         setEmail(data.email);
@@ -51,10 +46,8 @@ const EditUser = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("🚀 Envoi des modifications...");
 
     const updatedUser = { name, email, password, role };
-    console.log("Données envoyées :", updatedUser);
 
     try {
       const response = await fetch(API_URL, {
