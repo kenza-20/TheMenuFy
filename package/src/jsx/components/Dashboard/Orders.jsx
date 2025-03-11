@@ -1,36 +1,45 @@
-import React, { useState, useEffect, useRef } from "react";
-import {useNavigate } from "react-router-dom";
-import { Button, Dropdown } from "react-bootstrap";
-import { FaPlus, FaSortAlphaDown, FaSortAlphaUp } from "react-icons/fa";
-import { Form } from "react-bootstrap";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button, Form, Alert } from "react-bootstrap";
+import { FaPlus, FaSortAlphaDown, FaSortAlphaUp, FaEdit, FaTrash, FaCheckCircle, FaBan } from "react-icons/fa";
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
+  const [filteredUsers, setFilteredUsers] = useState([]);
+  const [selectedRole, setSelectedRole] = useState("all");
+  const [sortOrder, setSortOrder] = useState("asc");
+  const [alertMessage, setAlertMessage] = useState("");
   const API_URL = "http://localhost:3000/api/users";
   const navigate = useNavigate();
-  const activePag = useRef(0);
-  const sort = 10;
-  const [test, setTest] = useState(0);
-
-
-
 
   useEffect(() => {
     fetchUsers();
-  }, [test]);
-
-
+  }, []);
 
   const fetchUsers = () => {
     fetch(API_URL)
       .then((res) => res.json())
-      .then((data) => setUsers(data))
+      .then((data) => {
+        setUsers(data);
+        setFilteredUsers(data);
+      })
       .catch((err) => console.error("Erreur:", err));
   };
 
-  const handleApprove = async (userId) => {
+  const handleApprove = async (userId, currentStatus) => {
+    const newStatus = !currentStatus; // Inverser l'état
     await fetch(`${API_URL}/approve/${userId}`, { method: "PUT" });
-    fetchUsers();
+
+    setAlertMessage(newStatus ? "Utilisateur approuvé !" : "Utilisateur désapprouvé !");
+    
+    // Mettre à jour l'état localement pour un affichage instantané
+    setFilteredUsers((prevUsers) =>
+      prevUsers.map((user) =>
+        user._id === userId ? { ...user, validated: newStatus } : user
+      )
+    );
+
+    setTimeout(() => setAlertMessage(""), 2000);
   };
 
   const handleBlock = async (userId) => {
@@ -51,28 +60,50 @@ const UserManagement = () => {
     navigate("/add-user");
   };
 
+  // Filtrer par rôle
+  const handleFilterChange = (event) => {
+    const role = event.target.value;
+    setSelectedRole(role);
+    setFilteredUsers(role === "all" ? users : users.filter((user) => user.role === role));
+  };
+
+  // Trier les utilisateurs (croissant/décroissant)
+  const handleSort = () => {
+    const sortedUsers = [...filteredUsers].sort((a, b) => (sortOrder === "asc" ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name)));
+    setFilteredUsers(sortedUsers);
+    setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+  };
+
   return (
     <>
-<div className="d-sm-flex mb-lg-4 mb-2">
-  {/* Filtres */}
-  <div className="d-flex gap-3 ms-auto">
-          <Form.Select>
+      {/* Affichage de l'alerte */}
+      {alertMessage && <Alert variant="success" className="text-center">{alertMessage}</Alert>}
+
+      <div className="d-sm-flex mb-lg-4 mb-2">
+        {/* Filtres et tri */}
+        <div className="d-flex gap-2 ms-auto">
+          <Form.Select value={selectedRole} onChange={handleFilterChange} className="form-select-sm">
             <option value="all">Tous</option>
-            <option value="admin">Restaurant</option>
-            <option value="user">Client</option>
-            <option value="moderator">Cuisine</option>
+            <option value="super_admin">Super Admin</option>
+            <option value="admin">Admin</option>
+            <option value="kitchen">Cuisine</option>
+            <option value="restaurant">Restaurant</option>
+            <option value="client">Client</option>
           </Form.Select>
 
           {/* Bouton de tri */}
-          <button className="btn btn-secondary" >
-            <FaSortAlphaDown />
-          </button>
-    <Button variant="primary" onClick={handleAddUser}>
-      <FaPlus />
-    </Button>
-  </div>
-</div>
+          <Button variant="secondary" size="xs" className="btn-sm" onClick={handleSort}>
+            {sortOrder === "asc" ? <FaSortAlphaDown /> : <FaSortAlphaUp />}
+          </Button>
 
+          {/* Ajouter un utilisateur */}
+          <Button variant="primary" size="xs" className="btn-sm" onClick={handleAddUser}>
+            <FaPlus /> Ajouter
+          </Button>
+        </div>
+      </div>
+
+      {/* Tableau des utilisateurs */}
       <div className="row">
         <div className="col-lg-12">
           <div className="table-responsive rounded card-table">
@@ -80,39 +111,45 @@ const UserManagement = () => {
               <thead>
                 <tr>
                   <th>ID</th>
-                  <th>First name</th>
-                  <th>Last name</th>
-                  <th>email</th>
+                  <th>Nom</th>
+                  <th>Prénom</th>
+                  <th>Email</th>
+                  <th>Rôle</th>
+                  <th>État</th>
                   <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {users.map((user) => (
+                {filteredUsers.map((user) => (
                   <tr key={user._id}>
                     <td>{user._id}</td>
                     <td>{user.name}</td>
                     <td>{user.surname}</td>
                     <td>{user.email}</td>
+                    <td>{user.role}</td>
+                    <td className={user.isBlocked ? "text-danger" : "text-success"}>
+                      {user.isBlocked ? "Bloqué" : "Non bloqué"}
+                    </td>
                     <td>
-                      <Dropdown>
-                        <Dropdown.Toggle variant="" className="i-false">
-                          <i className="las la-ellipsis-h"></i>
-                        </Dropdown.Toggle>
-                        <Dropdown.Menu>
-                          <Dropdown.Item onClick={() => handleEdit(user._id)}>
-                            <i className="las la-edit text-warning me-3" /> Modifier
-                          </Dropdown.Item>
-                          <Dropdown.Item onClick={() => handleDelete(user._id)}>
-                            <i className="las la-trash text-danger me-3" /> Supprimer
-                          </Dropdown.Item>
-                          <Dropdown.Item onClick={() => handleApprove(user._id)}>
-                            <i className="las la-check-circle text-success me-3" /> Approuver
-                          </Dropdown.Item>
-                          <Dropdown.Item onClick={() => handleBlock(user._id)}>
-                            <i className="las la-ban text-danger me-3" /> {user.isBlocked ? "Débloquer" : "Bloquer"}
-                          </Dropdown.Item>
-                        </Dropdown.Menu>
-                      </Dropdown>
+                      <div className="d-flex gap-1">
+                        <Button variant="warning" size="xs" className="btn-sm" onClick={() => handleEdit(user._id)}>
+                          <FaEdit />
+                        </Button>
+                        <Button variant="danger" size="xs" className="btn-sm" onClick={() => handleDelete(user._id)}>
+                          <FaTrash />
+                        </Button>
+                        <Button variant={user.isBlocked ? "success" : "secondary"} size="xs" className="btn-sm" onClick={() => handleBlock(user._id)}>
+                          <FaBan /> {user.isBlocked ? "Débloquer" : "Bloquer"}
+                        </Button>
+                        <Button
+                          variant={user.validated ? "success" : "outline-success"}
+                          size="xs"
+                          className="btn-sm"
+                          onClick={() => handleApprove(user._id, user.validated)}
+                        >
+                          <FaCheckCircle /> {user.validated ? "Approuvé" : "Inapprouvé"}
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                 ))}

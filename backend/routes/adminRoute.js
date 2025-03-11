@@ -6,14 +6,24 @@ const router = express.Router();
 // Ajouter un utilisateur (Admin uniquement)
 router.post('/', async (req, res) => {
     try {
-        const { name, email, password, role } = req.body;
-        const newUser = new User({ name, email, password, role });
+        console.log("Données reçues :", req.body);  // 🔍 Vérifie ce que le backend reçoit
+
+        const { name, surname, email, password, role } = req.body;
+
+        if (!name || !surname || !email || !password || !role) {
+            return res.status(400).json({ message: "Tous les champs sont requis !" });
+        }
+
+        const newUser = new User({ name, surname, email, password, role });
         await newUser.save();
         res.status(201).json(newUser);
     } catch (err) {
+        console.error("Erreur lors de l'ajout :", err);
         res.status(400).json(err);
     }
 });
+
+
 // Récupérer un utilisateur par ID
 router.get('/:id', async (req, res) => {
     try {

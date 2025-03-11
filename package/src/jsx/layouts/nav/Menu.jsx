@@ -18,7 +18,7 @@ export const MenuList = [
             {
                 title: 'List of Users',
                 to: 'orders',
-                roles: ['admin'] // Accessible uniquement par admin
+                roles: ['superAdmin', 'admin'] // Accessible par superAdmin et admin
             },
         ],
     },
