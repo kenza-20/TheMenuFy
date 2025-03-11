@@ -183,7 +183,7 @@ const forgotPassword = async (req, res) => {
       user.resetCode = resetCode;
       user.resetCodeExpiration = Date.now() + 3600000; // Le code expire dans 1 heure
       await user.save();
-
+      console.log(user)
       // Envoyer un email avec le code de réinitialisation
       const mailOptions = {
           from: process.env.EMAIL_USER,
@@ -233,6 +233,51 @@ const resetPassword = async (req, res) => {
   }
 };
 
+// Fonction pour mettre à jour le profil de l'utilisateur
+const updateMonProfil = async (req, res) => {
+  const { name, surname, email, password } = req.body;
+  const userId = req.user._id; // On suppose que l'ID de l'utilisateur est disponible via le token JWT
+
+  try {
+      // Vérification si l'email existe déjà
+      if (email) {
+          const existingUser = await User.findOne({ email });
+          if (existingUser && existingUser._id.toString() !== userId.toString()) {
+              return res.status(400).json({ message: 'Email already in use' });
+          }
+      }
+
+      // Récupérer l'utilisateur depuis la base de données
+      const user = await User.findById(userId);
+      if (!user) {
+          return res.status(404).json({ message: 'User not found' });
+      }
+
+      // Mise à jour des informations de l'utilisateur
+      if (name) user.name = name;
+      if (surname) user.surname = surname;
+      if (email) user.email = email;
+
+      // Si un mot de passe est fourni, on le hash et on le met à jour
+      if (password) {
+          const salt = await bcrypt.genSalt(10);
+          const hashedPassword = await bcrypt.hash(password, salt);
+          user.password = hashedPassword;
+      }
+
+      // Sauvegarde des modifications
+      await user.save();
+
+      res.status(200).json({ message: 'Profile updated successfully', user });
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Something went wrong while updating the profile' });
+  }
+};
 
 
-module.exports = { signupUser,login_post,logout,forgotPassword,resetPassword};
+
+
+
+
+module.exports = { signupUser,login_post,logout,forgotPassword,resetPassword,updateMonProfil};

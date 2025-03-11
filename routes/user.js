@@ -40,5 +40,8 @@ router.get("/confirm/:id", async (req, res) => {
     }
 });
 
+// Route pour mettre à jour le profil de l'utilisateur
+router.put('/update-profile', userController.updateMonProfil);
+
 
 module.exports = router;

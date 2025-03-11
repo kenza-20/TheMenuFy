@@ -12,7 +12,9 @@ const userSchema = new Schema({
   role: { type: String, enum: ['super_admin', 'admin', 'kitchen', 'restaurant', 'client'], required: true },
   approved: { type: Boolean, default: false },
   confirmed: { type: Boolean, default: false },
-  isBlocked: { type: Boolean, default: false }
+  isBlocked: { type: Boolean, default: false },
+  resetCode: { type: String },  // Doit être défini ici
+  resetCodeExpiration: { type: Date },  // Doit être défini ici
 
 
 });
