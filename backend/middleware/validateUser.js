@@ -51,7 +51,7 @@ const verifyToken = (req, res, next) => {
       return res.status(400).json({ error: 'Invalid token format' });
   }
 
-  const tokenToVerify = tokenParts[1];
+const tokenToVerify = tokenParts[1];
 
   console.log('Token:', tokenToVerify);  // Debugging token
 

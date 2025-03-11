@@ -2,10 +2,6 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const jwt = require('jsonwebtoken');
-const axios = require('axios');
-
-
 const app = express();
 const port = 3000;
 
@@ -13,6 +9,7 @@ const port = 3000;
 const superAdminRoute = require('./routes/superAdminRoutes');
 const userRoutes = require('./routes/user');
 const emailRoutes = require('./routes/email'); 
+const usersRoutes = require('./routes/adminRoute');
 
 // Middleware
 app.use(cors()); // Enable CORS for frontend requests
@@ -22,6 +19,7 @@ app.use(express.json());
 app.use('/api/user', userRoutes); 
 app.use('/api/email', emailRoutes); 
 app.use("/superAdmin", superAdminRoute);
+app.use('/api/users', usersRoutes);  // /api/users pour gérer les utilisateurs
 
 // Database Connection
 mongoose.connect('mongodb+srv://kenza:kenza2020@cluster0.65hm7.mongodb.net/themenufy?retryWrites=true&w=majority&appName=Cluster0')

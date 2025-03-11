@@ -3,46 +3,46 @@ const User = require('../models/userModel');
 const bcrypt = require('bcrypt');
 
 exports.updateProfileAndPassword = async (req, res) => {
+  const { id } = req.params;
+
+  if (!id || !req.body.name || !req.body.email) {
+      return res.status(400).json({ message: "ID, name et email sont requis" });
+  }
+
   try {
-    const { email, newPassword,name } = req.body;
-    const updates = {};
-
-    // Mise à jour de l'email si fourni
-    if (email) {
-      updates.email = email;
-    }
-
-    // Mise à jour de le nom si fourni
-    if (name) {
-      updates.nema = name;
-    }
-
-    // Mise à jour du mot de passe si fourni
-    if (newPassword) {
-      const hashedPassword = await bcrypt.hash(newPassword, 10);
-      updates.password = hashedPassword;
-    }
-
-    // Vérifier s'il y a au moins une donnée à mettre à jour
-    if (Object.keys(updates).length === 0) {
-      return res.status(400).json({ message: 'Aucune donnée à mettre à jour' });
-    }
-
-    // Mise à jour de l'utilisateur connecté
-    const updatedUser = await User.findByIdAndUpdate(req.user._id, updates, { new: true });
-    res.json({ message: 'Profil mis à jour', user: updatedUser });
+      const updatedAdmin = await User.findByIdAndUpdate(id, req.body, { new: true });
+      if (!updatedAdmin) {
+          return res.status(404).json({ message: "Admin non trouvé" });
+      }
+      res.json(updatedAdmin);
   } catch (error) {
-    res.status(500).json({
-      message: 'Erreur lors de la mise à jour du profil ou du mot de passe',
-      error: error.message,
-    });
+      res.status(500).json({ message: "Erreur serveur", error });
   }
 };
+
+
+exports.findByEmail = async (email) => {
+  try {
+    console.log("Recherche de l'utilisateur avec l'email :", email);
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      throw new Error("Utilisateur non trouvé");
+    }
+
+    return user;
+  } catch (error) {
+    console.error("Erreur lors de la récupération de l'utilisateur :", error.message);
+    throw new Error("Erreur lors de la récupération de l'utilisateur");
+  }
+};
+
+
 
 // Ajouter un nouvel admin (mais pas un superadmin)
 exports.addAdmin = async (req, res) => {
   try {
-    const { email, password, name } = req.body; // On récupère aussi le nom
+    const { email, password, name,surname } = req.body; // On récupère aussi le nom
     // Forcer le rôle à 'admin'
     const role = 'admin';
 
@@ -59,11 +59,15 @@ exports.addAdmin = async (req, res) => {
     const newAdmin = new User({
       email,
       password: hashedPassword,
-      name,              
+      name,
+      surname,              
       role,
-      validated: true,   // Par défaut validé, adapter selon votre logique
-      confirmed: true
-    });
+      approved: true,  
+      confirmed: true,
+      isBlocked: false,
+      resetCode: "",  // Défini comme vide
+      resetCodeExpiration: "" // Défini comme vide
+  });
 
     await newAdmin.save();
     res.status(201).json({ message: 'Admin ajouté avec succès', admin: newAdmin });
@@ -86,10 +90,10 @@ exports.updateAdmin = async (req, res) => {
       return res.status(403).json({ message: 'Impossible de modifier un superadmin' });
     }
     // On peut mettre à jour email, validated, etc.
-    const { email, validated, confirmed } = req.body;
+    const { email, name, surname } = req.body;
     const updatedAdmin = await User.findByIdAndUpdate(
       id,
-      { email, validated, confirmed },
+      { email, name, surname },
       { new: true }
     );
     res.json({ message: 'Admin mis à jour', admin: updatedAdmin });
@@ -138,7 +142,7 @@ exports.blockAdmin = async (req, res) => {
       return res.status(403).json({ message: 'Impossible de bloquer un superadmin' });
     }
     // Mettre validated à false pour bloquer
-    admin.validated = false;
+    admin.isBlocked = true;
     await admin.save();
     res.json({ message: 'Admin bloqué', admin });
   } catch (error) {
@@ -158,7 +162,7 @@ exports.unblockAdmin = async (req, res) => {
       return res.status(403).json({ message: 'Impossible de débloquer un superadmin' });
     }
     // Débloquer l'admin en mettant validated à true
-    admin.validated = true;
+    admin.isBlocked = false;
     await admin.save();
     res.json({ message: 'Admin débloqué', admin });
   } catch (error) {
@@ -166,3 +170,15 @@ exports.unblockAdmin = async (req, res) => {
   }
 };
 
+exports.getAdminById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const admin = await User.findById(id);
+    if (!admin) {
+      return res.status(404).json({ message: 'Admin non trouvé' });
+    }
+    res.json({ admin });
+  } catch (error) {
+    res.status(500).json({ message: 'Erreur lors de la récupération de l’admin', error: error.message });
+  }
+};

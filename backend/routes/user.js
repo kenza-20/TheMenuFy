@@ -166,9 +166,9 @@ const storage = multer.diskStorage({
     filename: (req, file, cb) => {
       cb(null, Date.now() + file.originalname); // Make filenames unique
     },
-  });
+});
   
-  const upload = multer({ storage });
+const upload = multer({ storage });
   
   // Route to handle updating profile with image upload
   router.put('/update-profile', Token, async (req, res) => {
@@ -199,6 +199,13 @@ const storage = multer.diskStorage({
         res.status(500).json({ message: "Failed to update profile" });
     }
 });
+
+// Route pour demander la réinitialisation du mot de passe
+router.post('/forgot-password', userController.forgotPassword);
+
+// Route pour réinitialiser le mot de passe
+router.post('/reset-password', userController.resetPassword);
+
 
 
 module.exports = router;
