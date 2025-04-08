@@ -17,11 +17,11 @@ const createToken = (_id, role) => {
 };
 
 const signupUser = async (req, res) => {
-    const { name, surname, email, password, role } = req.body;
+    const { name, surname, email, password, role, tel } = req.body;
 
     try {
         // 🔍 Validation des champs
-        if (!name || !surname || !email || !password ||  !role) {
+        if (!name || !surname || !email || !password ||  !role ||!tel) {
             throw new Error('All fields must be filled');
         }
         if (!validator.isEmail(email)) {
@@ -45,7 +45,7 @@ const signupUser = async (req, res) => {
         const approved = role !== 'restaurant'; // Auto-approve unless restaurant
         const confirmed = false; // Confirmed par défaut à false
 
-        const user = await User.create({ name, surname, email, password: hash, role, approved,confirmed });
+        const user = await User.create({ name, surname, email, password: hash, role, tel,approved,confirmed });
 
         // 🎟 Génération du Token
         const token = createToken(user._id, user.role);
@@ -70,21 +70,25 @@ const signupUser = async (req, res) => {
 
         // ✅ Envoi d'un email de bienvenue aux utilisateurs approuvés
         const loginUrl = `http://localhost:3000/api/user/confirm/${user._id}`;
-        await sendEmail(email, "Welcome to Themenufy!", 
-            `<h3>Welcome, ${name}!</h3>
-            <p>We're excited to have you on board.</p>
-            <p>Click the button below to log in:</p>
-            <table cellspacing="0" cellpadding="0" border="0" align="center">
-                <tr>
-                    <td align="center" bgcolor="#007BFF" style="border-radius: 5px; padding: 10px;">
-                        <a href="${loginUrl}" target="_blank" 
-                           style="display: inline-block; font-size: 16px; font-weight: bold; color: #ffffff; text-decoration: none; background-color: #007BFF; padding: 10px 20px; border-radius: 5px;">
-                           confirmer
-                        </a>
-                    </td>
-                </tr>
-            </table>
-            <p>Best regards,<br><strong>Themenufy Team</strong></p>`     
+        await sendEmail(email, "Email verification",
+            `
+  <div style="max-width: 600px; margin: auto; font-family: Arial, sans-serif; border: 1px solid #eee; border-radius: 10px; overflow: hidden;">
+    <div style="background-color: #f4ce36; padding: 40px 0; text-align: center;">
+      <img src="https://img.icons8.com/ios-filled/100/ffffff/secured-letter.png" width="50" alt="Verify Icon" />
+    </div>
+    <div style="padding: 30px; text-align: center;">
+      <h2>Email verification</h2>
+      <p>Hi ${name},</p>
+      <p>You're almost set to start enjoying <strong>Themenufy</strong>. Simply click the button below to verify your email address and get started.</p>
+      <a href="${loginUrl}" target="_blank" style="display: inline-block; background-color: #f4ce36; color: #ffffff; text-decoration: none; padding: 12px 25px; border-radius: 5px; margin-top: 20px; font-weight: bold;">
+        Verify my email address
+      </a>
+    </div>
+    <div style="text-align: center; padding: 20px 10px; font-size: 12px; color: #aaa;">
+      <p><a href="#" style="color: #aaa; text-decoration: none;">Privacy Policy</a> | <a href="#" style="color: #aaa; text-decoration: none;">Contact</a></p>
+    </div>
+  </div>
+  `
         );
 
        
@@ -95,52 +99,56 @@ const signupUser = async (req, res) => {
 };
 
 const login_post = async (req, res) => {
-  const { email, password } = req.body;
+    const { email, password } = req.body;
 
-  try {
-    // Récupérer l'utilisateur par email
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(404).json({ message: 'Utilisateur non trouvé.' });
-    }
-    
-    // Vérifier si l'utilisateur est validé et confirmé
-    if (user.role === 'restaurant' || user.approved === false) {
-      return res.status(403).json({ message: "Connexion refusée. Il faut attendre la validation du compte." });
-    }
-
-    if (user.confirmed === false) {
-      return res.status(403).json({ message: "Connexion refusée. Vous devez confirmer votre compte." });
-    }
-
-    // Comparer le mot de passe envoyé avec celui stocké dans la DB
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(401).json({ message: 'Mot de passe incorrect.' });
-    }
-
-      // Générer un token JWT
-      const token = jwt.sign(
-        { id: user._id, email: user.email, role: user.role },
-        process.env.JWT_SECRET,
-        { expiresIn: '1h' }
-      );
-  
-      // Réponse avec le token
-      res.json({
-        message: 'Connexion réussie.',
-        token,
-        user: {
-          id: user._id,
-          email: user.email,
-          role: user.role
+    try {
+        // Récupérer l'utilisateur par email
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ message: 'Utilisateur non trouvé.' });
         }
-      });
-    
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Erreur serveur.' });
-  }
+
+        // Vérifier si l'utilisateur est validé et confirmé
+        if (user.role === 'restaurant' || user.approved === false) {
+            return res.status(403).json({ message: "Connexion refusée. Il faut attendre la validation du compte." });
+        }
+
+        if (user.confirmed === false) {
+            return res.status(403).json({ message: "Connexion refusée. Vous devez confirmer votre compte." });
+        }
+
+        // Comparer le mot de passe envoyé avec celui stocké dans la DB
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(401).json({ message: 'Mot de passe incorrect.' });
+        }
+
+        // Générer un token JWT
+        const token = jwt.sign(
+            { id: user._id, email: user.email, role: user.role },
+            process.env.JWT_SECRET,
+            { expiresIn: '1h' }
+        );
+
+        // Enregistrer le token dans la base de données
+        user.token = token;
+        await user.save();
+
+        // Réponse avec le token
+        res.json({
+            message: 'Connexion réussie.',
+            token,
+            user: {
+                id: user._id,
+                email: user.email,
+                role: user.role
+            }
+        });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Erreur serveur.' });
+    }
 };
 
 const blacklist = new Set();
@@ -235,44 +243,89 @@ const resetPassword = async (req, res) => {
 
 // Fonction pour mettre à jour le profil de l'utilisateur
 const updateMonProfil = async (req, res) => {
-  const { name, surname, email, password } = req.body;
-  const userId = req.user._id; // On suppose que l'ID de l'utilisateur est disponible via le token JWT
+    const { name, surname, email, password, image } = req.body;
+    const token = req.headers.authorization?.split(" ")[1]; // Récupérer le token depuis l'en-tête Authorization
+    // Récupération de l'image uploadée
+    if(req.file) {
+        req.body.image = `/uploads/${req.file.filename}`;
+    }
+    if (!token) {
+        return res.status(401).json({ message: "Token manquant" });
+    }
 
-  try {
-      // Vérification si l'email existe déjà
-      if (email) {
-          const existingUser = await User.findOne({ email });
-          if (existingUser && existingUser._id.toString() !== userId.toString()) {
-              return res.status(400).json({ message: 'Email already in use' });
-          }
-      }
+    try {
+        // Récupérer l'utilisateur par token
+        const user = await User.findOne({ token });
+        if (!user) {
+            return res.status(404).json({ message: "Utilisateur non trouvé" });
+        }
 
-      // Récupérer l'utilisateur depuis la base de données
-      const user = await User.findById(userId);
-      if (!user) {
-          return res.status(404).json({ message: 'User not found' });
-      }
+        // Vérification si l'email est déjà utilisé par un autre
+        if (email) {
+            const existingUser = await User.findOne({ email });
+            if (existingUser && existingUser._id.toString() !== user._id.toString()) {
+                return res.status(400).json({ message: "Email déjà utilisé" });
+            }
+        }
 
-      // Mise à jour des informations de l'utilisateur
-      if (name) user.name = name;
-      if (surname) user.surname = surname;
-      if (email) user.email = email;
+        // Mise à jour
+        if (image) user.image = image;
+        if (name) user.name = name;
+        if (surname) user.surname = surname;
+        if (email) user.email = email;
 
-      // Si un mot de passe est fourni, on le hash et on le met à jour
-      if (password) {
-          const salt = await bcrypt.genSalt(10);
-          const hashedPassword = await bcrypt.hash(password, salt);
-          user.password = hashedPassword;
-      }
+        if (password) {
+            const salt = await bcrypt.genSalt(10);
+            user.password = await bcrypt.hash(password, salt);
+        }
 
-      // Sauvegarde des modifications
-      await user.save();
+        await user.save();
 
-      res.status(200).json({ message: 'Profile updated successfully', user });
-  } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: 'Something went wrong while updating the profile' });
-  }
+        res.status(200).json({ message: "Profil mis à jour avec succès", user });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Erreur serveur" });
+    }
+};
+
+
+const getByToken = async (req, res) => {
+    const token = req.headers.authorization?.split(" ")[1]; // Récupérer le token depuis l'en-tête Authorization
+
+    console.log("token reçu :", token);
+
+    if (!token) {
+        return res.status(400).json({ message: "Token manquant." });
+    }
+
+    try {
+        // Rechercher l'utilisateur ayant ce token
+        const user = await User.findOne({ token });
+
+        if (!user) {
+            return res.status(404).json({ message: "Utilisateur non trouvé." });
+        }
+
+        // Retourner les infos utilisateur
+        res.status(200).json({
+            user: {
+                id: user._id,
+                image: user.image,
+                name: user.name,
+                surname: user.surname,
+                email: user.email,
+                role: user.role,
+                tel: user.tel,
+                confirmed: user.confirmed,
+                password:user.password
+            }
+        });
+
+    } catch (error) {
+        console.error("Erreur dans getByToken:", error);
+        res.status(500).json({ message: "Erreur serveur lors de la récupération de l'utilisateur." });
+    }
 };
 
 
@@ -280,4 +333,5 @@ const updateMonProfil = async (req, res) => {
 
 
 
-module.exports = { signupUser,login_post,logout,forgotPassword,resetPassword,updateMonProfil};
+
+module.exports = { signupUser,login_post,logout,forgotPassword,resetPassword,updateMonProfil,getByToken};

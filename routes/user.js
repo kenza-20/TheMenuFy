@@ -1,5 +1,6 @@
 const express = require('express');
 const {validateUser,validateLogin} = require('../middleware/validateUser');
+const upload = require('../middleware/upload');
 const userModel = require('../models/userModel');
 const userController = require('../controlleurs/userController');
 const router = express.Router();
@@ -34,14 +35,29 @@ router.get("/confirm/:id", async (req, res) => {
         user.confirmed = true;
         await user.save();
 
-        res.status(200).send(`<h2>Your email has been confirmed! You can now     log in.</h2>`);
+        res.status(200).send(`
+<div style="background-color: #f5f5f5; padding: 40px 0;">
+  <div style="max-width: 600px; margin: auto; font-family: Arial, sans-serif; background: #ffffff; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); text-align: center; overflow: hidden;">
+    <div style="background-color: #f4ce36; padding: 40px 0;">
+      <img src="https://img.icons8.com/ios-filled/100/ffffff/ok.png" width="50" alt="Success" />
+    </div>
+    <div style="padding: 30px;">
+      <h2 style="margin-top: 0;">Thank you for your registration</h2>
+      <p style="max-width: 80%; margin: auto; color: #555;">
+        Your email has been successfully verified. You can now complete your registration or log in to your account.
+      </p>
+    </div>
+  </div>
+</div>
+
+`);
     } catch (error) {
         res.status(500).json({ error: "Something went wrong" });
     }
 });
 
 // Route pour mettre à jour le profil de l'utilisateur
-router.put('/update-profile', userController.updateMonProfil);
-
+router.put('/update-profile', upload.single('image'), userController.updateMonProfil);
+router.get('/bytoken', userController.getByToken);
 
 module.exports = router;
