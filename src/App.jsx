@@ -66,6 +66,8 @@ const App = () => {
           <Route path="/Register" element={!authenticated ? <Register /> : <Navigate to="/home" />} />
           <Route path="/ResetPasswordEmail" element={!authenticated ? <ResetPasswordEmail /> : <Navigate to="/home" />} />
           <Route path="/code" element={!authenticated ? <VerifyCode /> : <Navigate to="/home" />} />
+          <Route path="/Reset" element={authenticated ? <Reset /> : <Navigate to="/home" />} />
+          <Route path="/resetpwd" element={authenticated ? <ResetPassword /> : <Navigate to="/home" />} />
          
         
                  {/* Authenticated routes */}
@@ -73,13 +75,11 @@ const App = () => {
           <Route path="/ProfilePage" element={authenticated ? <ProfilePage /> : <Navigate to="/" />} />
           <Route path="/EditProfile" element={authenticated ? <EditProfile /> : <Navigate to="/" />} />
           <Route path="/Settings" element={authenticated ? <Settings /> : <Navigate to="/" />} />
-          <Route path="/Reset" element={authenticated ? <Reset /> : <Navigate to="/" />} />
           {/* <Route path="/test" element={authenticated ? <Test /> : <Navigate to="/" />} /> */}
           <Route path="/contact" element={authenticated ? <ContactPage /> : <Navigate to="/" />} />
           <Route path="/services" element={authenticated ? <ServicesPage /> : <Navigate to="/" />} />
           <Route path="/aboutus" element={authenticated ? <AboutUs /> : <Navigate to="/" />} />
           <Route path="/home" element={authenticated ? <HomePage /> : <Navigate to="/" />} />
-          <Route path="/resetpwd" element={authenticated ? <ResetPassword /> : <Navigate to="/" />} />
           
           <Route path="/menu" element={authenticated ? <Menu /> : <Navigate to="/" />} />
           <Route path="/reservation" element={authenticated ? <Reservation /> : <Navigate to="/" />} />

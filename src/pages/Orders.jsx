@@ -2,6 +2,17 @@ import React from "react";
 import { Link } from "react-router-dom";
 
 const Orders = () => {
+
+  const orders=[{
+    id: 1,
+    category: 'entrées',
+    name: 'Salade César',
+    description: 'Laitue romaine, croûtons, parmesan, sauce césar maison',
+    price: 8.90,
+    image: '/salade-cesar.jpg'
+  }]
+
+  
   return (
     <div className="relative min-h-screen flex flex-col">
       {/* Hero Section */}
