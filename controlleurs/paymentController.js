@@ -12,8 +12,8 @@ const checkout = async (req, res) => {
           payment_method_types: ['card'],
           line_items: line_items,
           mode: 'payment',
-          success_url: `http://localhost:5173/`,
-          cancel_url: `http://localhost:5173/`,
+          success_url: `http://localhost:5173/success?session_id={CHECKOUT_SESSION_ID}`,
+          cancel_url: 'http://localhost:5173/',
         });
     
         res.json({ id: session.id }); // Return sessionId here
