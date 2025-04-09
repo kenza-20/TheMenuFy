@@ -102,6 +102,7 @@ const Navbar = ({ authenticated }) => {
               <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-lg py-2 text-black z-50">
                 <Link to="/ProfilePage" className="block px-4 py-2 hover:text-yellow-500" onClick={() => setIsProfileOpen(false)}>Profile</Link>
                 <Link to="/settings" className="block px-4 py-2 hover:text-yellow-500" onClick={() => setIsProfileOpen(false)}>Settings</Link>
+                <Link to="/Cart" className="block px-4 py-2 hover:text-yellow-500" onClick={() => setIsProfileOpen(false)}>Cart</Link>
                 <Link to="/login" onClick={() => { handleLogout(); setIsProfileOpen(false); }} className="block px-4 py-2 hover:text-yellow-500">Logout</Link>
               </div>
             )}
