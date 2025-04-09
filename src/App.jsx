@@ -25,6 +25,8 @@ import Reservation from "./pages/Reservation";
 import Orders from "./pages/Orders";
 
 import Panier from "./pages/Panier";
+import Success from './pages/Success';
+
 
 import { isAuthenticated } from "./selectors/AuthSelector"; // Import isAuthenticated
 import { useSelector } from 'react-redux'; // Use redux selector for auth
@@ -88,6 +90,8 @@ const App = () => {
           <Route path="/orders" element={authenticated ? <Orders /> : <Navigate to="/" />} />
 
           <Route path="/cart" element={authenticated ? <Panier /> : <Navigate to="/" />} />
+          <Route path="/success"element={authenticated ? <Success /> : <Navigate to="/" />} />
+
 
 
           <Route

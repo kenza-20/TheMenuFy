@@ -4,6 +4,10 @@ import Button from "../components/button";
 import BlurContainer from "../components/blurContainer";
 import Swal from 'sweetalert'; // Import SweetAlert2
 
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+
+
 import salmonImg from "../assets/food/salmon.jpg";
 import hamburgerImg from "../assets/food/hamburger.jpg";
 import pizzaImg from "../assets/food/pizza.jpg";
@@ -43,6 +47,42 @@ const meals = [
   },
 ];
 
+ //   4000001240000000
+
+const generateInvoicePDF = () => {
+  const doc = new jsPDF();
+  doc.setFontSize(18);
+  doc.text('Invoice', 14, 22);
+
+  const headers = [['Meal', 'Quantity', 'Price (CAD)', 'Subtotal']];
+  const data = meals
+    .filter(meal => quantities[meal.id] > 0)
+    .map(meal => [
+      meal.name,
+      quantities[meal.id],
+      `$${meal.price.toFixed(2)}`,
+      `$${(meal.price * quantities[meal.id]).toFixed(2)}`
+    ]);
+
+    const now = new Date();
+const formattedDate = now.toLocaleDateString();
+const formattedTime = now.toLocaleTimeString();
+
+doc.setFontSize(11);
+doc.text(`Date: ${formattedDate}   Time: ${formattedTime}`, 14, 27);
+
+  doc.autoTable({
+    head: headers,
+    body: data,
+    startY: 30
+  });
+
+  doc.text(`Total: $${total}`, 14, doc.lastAutoTable.finalY + 10);
+
+  doc.save('invoice.pdf');
+};
+
+
 const Panier = () => {
   const [quantities, setQuantities] = useState(meals.reduce((acc, meal) => {
     acc[meal.id] = 1;
@@ -69,6 +109,21 @@ const Panier = () => {
 
   const handleCheckout = async () => {
     try {
+      const selectedMeals = meals
+        .filter(meal => quantities[meal.id] > 0)
+        .map(meal => ({
+          name: meal.name,
+          quantity: quantities[meal.id],
+          price: meal.price,
+          subtotal: (meal.price * quantities[meal.id]).toFixed(2)
+        }));
+  
+      const total = selectedMeals.reduce((acc, item) => acc + parseFloat(item.subtotal), 0).toFixed(2);
+  
+      // Save to localStorage so we can access it on the Success page
+      localStorage.setItem("invoiceData", JSON.stringify({ selectedMeals, total }));
+  
+      // Proceed to Stripe checkout
       const line_items = meals
         .filter(meal => quantities[meal.id] > 0)
         .map(meal => ({
@@ -78,34 +133,23 @@ const Panier = () => {
   
       const response = await fetch('http://localhost:3000/api/payment/checkout', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ line_items }),
       });
   
       const { id } = await response.json();
+      if (!id) throw new Error('sessionId not returned from server');
   
-      if (!id) {
-        throw new Error('sessionId not returned from server');
-      }
-
-    //   4000001240000000
-
       const stripe = await stripePromise;
-      const { error } = await stripe.redirectToCheckout({ sessionId: id }).then((result) => {
-        console.log('hey',result)
-        swal("Success", "Checkout Successful", "Your payment has been processed successfully.");
-
-      })
+      await stripe.redirectToCheckout({ sessionId: id });
   
-     
-} catch (error) {
-    console.error('Error during checkout:', error);
-    swal("Error", "An error occurred during the checkout process. Please try again.", "error");
-    
+    } catch (error) {
+      console.error('Error during checkout:', error);
+      swal("Error", "An error occurred during the checkout process. Please try again.", "error");
     }
   };
+  
+  
   
 
   return (
