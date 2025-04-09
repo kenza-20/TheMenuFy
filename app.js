@@ -11,7 +11,7 @@ const superAdminRoute = require('./routes/superAdminRoutes');
 const userRoutes = require('./routes/user');
 const emailRoutes = require('./routes/email'); 
 const usersRoutes = require('./routes/adminRoute');
-
+const paymentRoutes = require('./routes/paymentRoutes');
 // Middleware
 app.use(cors({
     origin: '*',  // URL de ton frontend
@@ -26,6 +26,7 @@ app.use('/api/user', userRoutes);
 app.use('/api/email', emailRoutes); 
 app.use("/superAdmin",superAdminRoute)
 app.use('/api/users', usersRoutes);  // /api/users pour gérer les utilisateurs
+app.use('/api/payment', paymentRoutes);  // /api/users pour gérer les utilisateurs
 
 
 
