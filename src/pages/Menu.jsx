@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { FaShoppingCart, FaPlus } from 'react-icons/fa';
+import { FaPlus } from 'react-icons/fa';
 
 const Menu = () => {
-  const [cart, setCart] = useState([]);
   const [activeCategory, setActiveCategory] = useState('plats');
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupMessage, setPopupMessage] = useState('');
 
   const menuItems = [
     {
@@ -35,12 +36,32 @@ const Menu = () => {
   const categories = ['entrées', 'plats', 'desserts'];
 
   const addToCart = (item) => {
-    setCart([...cart, { ...item, quantity: 1 }]);
+    const userId = localStorage.getItem('userId'); // Récupère userId statique
+
+    if (!userId) {
+      alert("Utilisateur non connecté");
+      return;
+    }
+
+    const commandes = JSON.parse(localStorage.getItem('commandes')) || [];
+    const nouvelleCommande = {
+      id_commande: Date.now(), // ID unique
+      id_user: userId,
+      id_plat: item.id,
+    };
+
+    localStorage.setItem('commandes', JSON.stringify([...commandes, nouvelleCommande]));
+
+    setPopupMessage(`Commande ajoutée : ${item.name}`);
+    setShowPopup(true);
+
+    setTimeout(() => {
+      setShowPopup(false); // Fermer la popup après 3 secondes
+    }, 3000);
   };
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Background Image */}
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat -z-10"
         style={{
@@ -49,18 +70,15 @@ const Menu = () => {
         }}
       />
 
-
-      {/* Main Content */}
       <main className="relative flex-grow flex items-center justify-center py-6 px-4 sm:px-6 lg:px-20">
         <div className="w-full max-w-7xl mx-auto">
-          {/* Categories */}
           <div className="flex justify-center mb-8 space-x-4">
             {categories.map(category => (
               <button
                 key={category}
                 onClick={() => setActiveCategory(category)}
                 className={`px-6 py-2 rounded-full text-sm font-medium ${
-                  activeCategory === category 
+                  activeCategory === category
                     ? 'bg-yellow-500 text-white'
                     : 'bg-white/10 text-yellow-400 hover:bg-yellow-400/20'
                 }`}
@@ -70,18 +88,17 @@ const Menu = () => {
             ))}
           </div>
 
-          {/* Menu Items */}
           <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {menuItems
                 .filter(item => item.category === activeCategory)
                 .map(item => (
-                  <div 
-                    key={item.id} 
+                  <div
+                    key={item.id}
                     className="bg-white/5 rounded-xl p-6 border border-white/10 hover:bg-white/10 transition-colors"
                   >
-                    <img 
-                      src={item.image} 
+                    <img
+                      src={item.image}
                       alt={item.name}
                       className="w-full h-48 object-cover rounded-lg mb-4"
                     />
@@ -89,7 +106,7 @@ const Menu = () => {
                     <p className="text-gray-300 text-sm mb-4">{item.description}</p>
                     <div className="flex justify-between items-center">
                       <span className="text-lg font-bold text-yellow-500">{item.price}€</span>
-                      <button 
+                      <button
                         onClick={() => addToCart(item)}
                         className="bg-yellow-500 text-black px-4 py-2 rounded-full text-sm hover:bg-yellow-600 flex items-center transition-all"
                       >
@@ -103,6 +120,22 @@ const Menu = () => {
           </div>
         </div>
       </main>
+
+      {/* Popup de confirmation */}
+      {showPopup && (
+        <div className="fixed inset-0 flex justify-center items-center z-50">
+          <div className="bg-black bg-opacity-50 absolute inset-0"></div>
+          <div className="relative bg-yellow-500 text-black p-6 rounded-lg shadow-lg max-w-md w-full flex flex-col items-center">
+            <h3 className="text-xl font-semibold">{popupMessage}</h3>
+            <button
+              onClick={() => setShowPopup(false)}
+              className="mt-4 text-lg font-bold text-black bg-white px-4 py-2 rounded-full hover:bg-gray-200"
+            >
+              Fermer
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

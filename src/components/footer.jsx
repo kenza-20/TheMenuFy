@@ -16,7 +16,7 @@ const Footer = () => {
            </div>
            <div className="space-y-2">
              <h6 className="text-white font-medium mb-2">Navigation</h6>
-             {['Menu', 'Reservation', 'Aboutus', 'Contact'].map((item, i) => (
+             {['Menu', 'Reservation','Services', 'Aboutus', 'Contact'].map((item, i) => (
                <Link key={i} to={`/${item.toLowerCase()}`} className="block text-gray-400 hover:text-yellow-400 text-sm">
                  {item}
                </Link>

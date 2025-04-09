@@ -8,7 +8,7 @@ const AboutUs = () => {
       style={{ backgroundImage: "url('/about-bg.jpg')" }} // Remplace par ton image
     >
       {/* Overlay sombre pour améliorer la lisibilité */}
-      <div className="absolute inset-0 bg-black/60"></div>
+      <div className="absolute inset-0 bg-black/20"></div>
 
       {/* Contenu principal */}
       <motion.div

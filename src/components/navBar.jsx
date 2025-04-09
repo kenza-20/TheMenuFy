@@ -63,6 +63,7 @@ const Navbar = ({ authenticated }) => {
               <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-lg py-2 text-black z-50">
                 <Link to="/ProfilePage" className="block px-4 py-2 hover:text-yellow-500" onClick={() => setIsProfileOpen(false)}>Profile</Link>
                 <Link to="/settings" className="block px-4 py-2 hover:text-yellow-500" onClick={() => setIsProfileOpen(false)}>Settings</Link>
+                <Link to="/Cart" className="block px-4 py-2 hover:text-yellow-500" onClick={() => setIsProfileOpen(false)}>Cart</Link>
                 <Link to="/login" onClick={() => { handleLogout(); setIsProfileOpen(false); }} className="block px-4 py-2 hover:text-yellow-500">Logout</Link>
               </div>
             )}
@@ -80,10 +81,16 @@ const Navbar = ({ authenticated }) => {
           </>
         ) : (
           <>
-            <Link to="/menu" className="text-white hover:text-yellow-500 transition">Menu</Link>
+            <Link to="/resto/2/menu" className="text-white hover:text-yellow-500 transition">Menu</Link>
             <Link to="/reservation" className="text-white hover:text-yellow-500 transition">Réserver</Link>
             <Link to="/orders" className="text-white hover:text-yellow-500 transition">Mes commandes</Link>
-          </>
+            <Link to="/scan" className="text-white hover:text-yellow-500">
+  Scanner QR
+</Link>
+
+
+
+</>
         )}
       </div>
 
@@ -102,6 +109,7 @@ const Navbar = ({ authenticated }) => {
               <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-lg py-2 text-black z-50">
                 <Link to="/ProfilePage" className="block px-4 py-2 hover:text-yellow-500" onClick={() => setIsProfileOpen(false)}>Profile</Link>
                 <Link to="/settings" className="block px-4 py-2 hover:text-yellow-500" onClick={() => setIsProfileOpen(false)}>Settings</Link>
+                <Link to="/Cart" className="block px-4 py-2 hover:text-yellow-500" onClick={() => setIsProfileOpen(false)}>Cart</Link>
                 <Link to="/login" onClick={() => { handleLogout(); setIsProfileOpen(false); }} className="block px-4 py-2 hover:text-yellow-500">Logout</Link>
               </div>
             )}
