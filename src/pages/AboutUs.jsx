@@ -10,6 +10,7 @@ const AboutUs = () => {
       {/* Overlay sombre pour améliorer la lisibilité */}
       <div className="absolute inset-0 bg-black/20"></div>
 
+
       {/* Contenu principal */}
       <motion.div
         className="relative bg-white/10 backdrop-blur-md text-white p-10 md:p-16 rounded-2xl shadow-lg w-11/12 md:w-3/4 lg:w-2/3 text-center"
