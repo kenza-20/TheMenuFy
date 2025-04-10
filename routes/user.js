@@ -1,0 +1,58 @@
+const express = require('express');
+const { validateUser, validateLogin } = require('../middleware/validateUser');
+const upload = require('../middleware/upload');
+const userModel = require('../models/userModel');
+const userController = require('../controlleurs/userController');
+const reservationController = require('../controlleurs/userController'); // Importing the reservation controller
+const router = express.Router();
+
+// User routes
+router.post('/signup', validateUser, userController.signupUser);
+router.post('/login', validateLogin, userController.login_post);
+router.post("/logout", userController.logout);
+router.post('/forgot-password', userController.forgotPassword);
+router.post('/reset-password', userController.resetPassword);
+router.get("/confirm/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = await userModel.findById(id);
+    if (!user) {
+      return res.status(400).json({ error: "Invalid confirmation link" });
+    }
+    if (user.confirmed) {
+      return res.status(200).json({ message: "Your account is already confirmed" });
+    }
+    user.confirmed = true;
+    await user.save();
+
+    res.status(200).send(`
+      <div style="background-color: #f5f5f5; padding: 40px 0;">
+        <div style="max-width: 600px; margin: auto; font-family: Arial, sans-serif; background: #ffffff; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); text-align: center; overflow: hidden;">
+          <div style="background-color: #f4ce36; padding: 40px 0;">
+            <img src="https://img.icons8.com/ios-filled/100/ffffff/ok.png" width="50" alt="Success" />
+          </div>
+          <div style="padding: 30px;">
+            <h2 style="margin-top: 0;">Thank you for your registration</h2>
+            <p style="max-width: 80%; margin: auto; color: #555;">
+              Your email has been successfully verified. You can now complete your registration or log in to your account.
+            </p>
+          </div>
+        </div>
+      </div>
+    `);
+  } catch (error) {
+    res.status(500).json({ error: "Something went wrong" });
+  }
+});
+
+// Update profile route
+router.put('/update-profile', upload.single('image'), userController.updateMonProfil);
+
+// Get user by token route
+router.get('/bytoken', userController.getByToken);
+
+// Reservation routes
+router.post('/reservations', reservationController.addReservation); // Create reservation
+router.get('/reservations/:userId', reservationController.getReservationsByUser); // Get reservations for a user
+
+module.exports = router;
