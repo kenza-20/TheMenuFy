@@ -1,0 +1,397 @@
+const User = require('../models/userModel');
+const jwt = require('jsonwebtoken');
+const validator = require("validator");
+const bcrypt = require('bcrypt');
+const sendEmail = require('../emailService');
+const crypto = require('crypto');
+const nodemailer = require('nodemailer');
+
+require('dotenv').config();
+
+// Generate Token
+const createToken = (_id, role) => {
+    if (!process.env.SECRET) {
+        throw new Error("JWT Secret is missing! Make sure to define SECRET in your .env file.");
+    }
+    return jwt.sign({ _id, role }, process.env.SECRET, { expiresIn: '100d' });
+};
+
+const signupUser = async (req, res) => {
+    const { name, surname, email, password, role, tel } = req.body;
+
+    try {
+        // 🔍 Validation des champs
+        if (!name || !surname || !email || !password ||  !role ||!tel) {
+            throw new Error('All fields must be filled');
+        }
+        if (!validator.isEmail(email)) {
+            throw new Error('Email not valid');
+        }
+        if (!validator.isStrongPassword(password)) {
+            throw new Error('Password must be at least 8 characters long, with uppercase, lowercase, number, and symbol');
+        }
+
+        // 🔍 Vérification si l'email existe déjà
+        const exists = await User.findOne({ email });
+        if (exists) {
+            throw new Error('Email already in use');
+        }
+
+        // 🔑 Hash du mot de passe
+        const salt = await bcrypt.genSalt(10);
+        const hash = await bcrypt.hash(password, salt);
+
+        // ✅ Création de l'utilisateur
+        const approved = role !== 'restaurant'; // Auto-approve unless restaurant
+        const confirmed = false; // Confirmed par défaut à false
+
+        const user = await User.create({ name, surname, email, password: hash, role, tel,approved,confirmed });
+
+        // 🎟 Génération du Token
+        const token = createToken(user._id, user.role);
+
+        // 📩 Notification par email
+        if (role === 'restaurant' && !approved) {
+            await sendEmail(email, "Approval Pending", 
+                `<h3>Hello ${name},</h3>
+                <p>Your account is pending admin approval. You'll receive an email once approved.</p>
+                <p>Best regards,<br><strong>Themenufy Team</strong></p>`
+            );
+
+            return res.status(201).json({ 
+                message: "Signup successful. Waiting for admin approval.", 
+                token,
+                userId: user._id,  
+                role: user.role 
+            });
+        }
+
+        res.status(200).json({ name, surname, email, role, token, userId: user._id, confirmed: user.confirmed});
+
+        // ✅ Envoi d'un email de bienvenue aux utilisateurs approuvés
+        const loginUrl = `http://localhost:3000/api/user/confirm/${user._id}`;
+        await sendEmail(email, "Email verification",
+            `
+  <div style="max-width: 600px; margin: auto; font-family: Arial, sans-serif; border: 1px solid #eee; border-radius: 10px; overflow: hidden;">
+    <div style="background-color: #f4ce36; padding: 40px 0; text-align: center;">
+      <img src="https://img.icons8.com/ios-filled/100/ffffff/secured-letter.png" width="50" alt="Verify Icon" />
+    </div>
+    <div style="padding: 30px; text-align: center;">
+      <h2>Email verification</h2>
+      <p>Hi ${name},</p>
+      <p>You're almost set to start enjoying <strong>Themenufy</strong>. Simply click the button below to verify your email address and get started.</p>
+      <a href="${loginUrl}" target="_blank" style="display: inline-block; background-color: #f4ce36; color: #ffffff; text-decoration: none; padding: 12px 25px; border-radius: 5px; margin-top: 20px; font-weight: bold;">
+        Verify my email address
+      </a>
+    </div>
+    <div style="text-align: center; padding: 20px 10px; font-size: 12px; color: #aaa;">
+      <p><a href="#" style="color: #aaa; text-decoration: none;">Privacy Policy</a> | <a href="#" style="color: #aaa; text-decoration: none;">Contact</a></p>
+    </div>
+  </div>
+  `
+        );
+
+       
+
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
+const login_post = async (req, res) => {
+    const { email, password } = req.body;
+
+    try {
+        // Récupérer l'utilisateur par email
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ message: 'Utilisateur non trouvé.' });
+        }
+
+        // Vérifier si l'utilisateur est validé et confirmé
+        if (user.role === 'restaurant' || user.approved === false) {
+            return res.status(403).json({ message: "Connexion refusée. Il faut attendre la validation du compte." });
+        }
+
+        if (user.confirmed === false) {
+            return res.status(403).json({ message: "Connexion refusée. Vous devez confirmer votre compte." });
+        }
+
+        // Comparer le mot de passe envoyé avec celui stocké dans la DB
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(401).json({ message: 'Mot de passe incorrect.' });
+        }
+
+        // Générer un token JWT
+        const token = jwt.sign(
+            { id: user._id, email: user.email, role: user.role },
+            process.env.JWT_SECRET,
+            { expiresIn: '1h' }
+        );
+
+        // Enregistrer le token dans la base de données
+        user.token = token;
+        await user.save();
+
+        // Réponse avec le token
+        res.json({
+            message: 'Connexion réussie.',
+            token,
+            user: {
+                id: user._id,
+                email: user.email,
+                role: user.role
+            }
+        });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Erreur serveur.' });
+    }
+};
+
+const blacklist = new Set();
+const logout = (req, res) => {
+  const token = req.headers.authorization?.split(" ")[1]; // Récupérer le token
+
+  if (!token) {
+    return res.status(400).json({ message: "Token manquant." });
+  }
+
+  blacklist.add(token); // Ajouter à la blacklist
+  res.json({ message: "Déconnexion réussie." });
+};
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+      user: process.env.EMAIL_USER,   
+      pass: process.env.EMAIL_PASS   
+  }
+});
+
+
+// Fonction pour demander la réinitialisation du mot de passe
+const forgotPassword = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+      // Vérifier si l'email existe dans la base de données
+      const user = await User.findOne({ email });
+      if (!user) {
+          console.log('User not found');
+          return res.status(400).json({ error: 'Email not found' });
+      }
+
+      // Générer un code de réinitialisation
+      const resetCode = crypto.randomBytes(3).toString('hex'); // Code de 6 caractères
+
+      // Enregistrer le code dans l'utilisateur (dans un champ temporaire)
+      user.resetCode = resetCode;
+      user.resetCodeExpiration = Date.now() + 3600000; // Le code expire dans 1 heure
+      await user.save();
+      console.log(user)
+      // Envoyer un email avec le code de réinitialisation
+      const mailOptions = {
+          from: process.env.EMAIL_USER,
+          to: email,
+          subject: 'Password Reset Code',
+          html: `
+              <h3>Password Reset Request</h3>
+              <p>We received a request to reset your password.</p>
+              <p>Your reset code is: <strong>${resetCode}</strong></p>
+              <p>If you didn't request a password reset, please ignore this email.</p>
+          `
+      };
+
+      await transporter.sendMail(mailOptions);
+
+      res.status(200).json({ message: 'Reset code sent to your email' });
+  } catch (error) {
+      console.error('Error during password reset process:', error);
+      res.status(500).json({ error: 'Something went wrong' });
+  }
+};
+
+// Fonction pour réinitialiser le mot de passe
+const resetPassword = async (req, res) => {
+  const { resetCode, newPassword } = req.body;
+
+  try {
+      // Vérifier si le code est valide et non expiré
+      const user = await User.findOne({ resetCode, resetCodeExpiration: { $gt: Date.now() } });
+      if (!user) {
+          return res.status(400).json({ error: 'Invalid or expired reset code' });
+      }
+
+      // Hacher le nouveau mot de passe
+      const hashedPassword = await bcrypt.hash(newPassword, 10);  // Le "10" représente le nombre de "salts rounds"
+
+      // Mettre à jour le mot de passe de l'utilisateur
+      user.password = hashedPassword;
+      user.resetCode = undefined; // Effacer le code de réinitialisation
+      user.resetCodeExpiration = undefined; // Effacer l'expiration du code
+      await user.save();
+
+      res.status(200).json({ message: 'Password reset successfully' });
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Something went wrong' });
+  }
+};
+
+// Fonction pour mettre à jour le profil de l'utilisateur
+const updateMonProfil = async (req, res) => {
+    const { name, surname, email, password } = req.body;
+    const token = req.headers.authorization?.split(" ")[1]; // Retrieve token from Authorization header
+  
+    // Handle file upload (if any)
+    if (req.file) {
+      req.body.image = `/uploads/${req.file.filename}`; // Assuming multer processes the uploaded file
+    }
+  
+    if (!token) {
+      return res.status(401).json({ message: "Token manquant" });
+    }
+  
+    try {
+      const user = await User.findOne({ token });
+  
+      if (!user) {
+        return res.status(404).json({ message: "Utilisateur non trouvé" });
+      }
+  
+      // Check if email is already taken
+      if (email && email !== user.email) {
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+          return res.status(400).json({ message: "Email déjà utilisé" });
+        }
+      }
+  
+      // Update fields
+      if (name) user.name = name;
+      if (surname) user.surname = surname;
+      if (email) user.email = email;
+      if (password) {
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(password, salt);
+      }
+      if (req.body.image) user.image = req.body.image; // If there's an uploaded image, update the image field
+  
+      await user.save();
+  
+      res.status(200).json({ message: "Profil mis à jour avec succès", user });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Erreur serveur" });
+    }
+  };
+
+
+const getByToken = async (req, res) => {
+    const token = req.headers.authorization?.split(" ")[1]; // Récupérer le token depuis l'en-tête Authorization
+
+    console.log("token reçu :", token);
+
+    if (!token) {
+        return res.status(400).json({ message: "Token manquant." });
+    }
+
+    try {
+        // Rechercher l'utilisateur ayant ce token
+        const user = await User.findOne({ token });
+
+        if (!user) {
+            return res.status(404).json({ message: "Utilisateur non trouvé." });
+        }
+
+        // Retourner les infos utilisateur
+        res.status(200).json({
+            user: {
+                id: user._id,
+                image: user.image,
+                name: user.name,
+                surname: user.surname,
+                email: user.email,
+                role: user.role,
+                tel: user.tel,
+                confirmed: user.confirmed,
+                password:user.password
+            }
+        });
+
+    } catch (error) {
+        console.error("Erreur dans getByToken:", error);
+        res.status(500).json({ message: "Erreur serveur lors de la récupération de l'utilisateur." });
+    }
+};
+const addReservation = async (req, res) => {
+    const { userId, reservationDate, numberOfGuests, tableNumber, specialRequests } = req.body;
+
+    try {
+        // Validate input fields
+        if (!userId || !reservationDate || !numberOfGuests || !tableNumber) {
+            throw new Error('All fields must be filled');
+        }
+
+        // Create the reservation
+        const reservation = await Reservation.create({
+            userId,
+            reservationDate,
+            numberOfGuests,
+            tableNumber,
+            specialRequests,
+        });
+
+        res.status(201).json({ message: 'Reservation added successfully', reservation });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
+// Fetch all reservations for a user
+const getReservationsByUser = async (req, res) => {
+    const { userId } = req.params;
+
+    try {
+        // Fetch all reservations by the user's ID
+        const reservations = await Reservation.find({ userId });
+
+        if (reservations.length === 0) {
+            return res.status(404).json({ message: 'No reservations found' });
+        }
+
+        res.status(200).json({ reservations });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// Fetch a specific reservation by ID
+const getReservationById = async (req, res) => {
+    const { reservationId } = req.params;
+
+    try {
+        // Fetch a reservation by its ID
+        const reservation = await Reservation.findById(reservationId);
+
+        if (!reservation) {
+            return res.status(404).json({ message: 'Reservation not found' });
+        }
+
+        res.status(200).json({ reservation });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+
+
+
+
+
+
+
+module.exports = { signupUser,login_post,logout,forgotPassword,resetPassword,updateMonProfil,addReservation,getReservationsByUser,getByToken , getReservationById};
