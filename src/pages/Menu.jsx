@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { FaPlus } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom'; // Importing useNavigate for navigation
+import { useNavigate } from 'react-router-dom';
 
 const Menu = () => {
   const [activeCategory, setActiveCategory] = useState('starters');
   const [showPopup, setShowPopup] = useState(false);
   const [popupMessage, setPopupMessage] = useState('');
+  const [searchLetter, setSearchLetter] = useState(''); // State for search input
 
   const menuItems = [
     {
@@ -35,7 +36,7 @@ const Menu = () => {
   ];
 
   const categories = ['starters', 'mains', 'desserts'];
-  const navigate = useNavigate(); // Hook for navigation
+  const navigate = useNavigate();
 
   const addToCart = (item) => {
     const userId = localStorage.getItem('userId');
@@ -52,7 +53,6 @@ const Menu = () => {
     };
 
     localStorage.setItem('orders', JSON.stringify([...orders, newOrder]));
-
     setPopupMessage(`Order added: ${item.name}`);
     setShowPopup(true);
 
@@ -62,9 +62,13 @@ const Menu = () => {
   };
 
   const handleReservation = (item) => {
-    // Pass dish info to the Reservation page
     navigate('/reservation', { state: { item } });
   };
+
+  // Filter menu items based on search letter
+  const filteredMenuItems = menuItems.filter(item =>
+    item.name.toLowerCase().startsWith(searchLetter.toLowerCase()) && item.category === activeCategory
+  );
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -93,40 +97,43 @@ const Menu = () => {
             ))}
           </div>
 
+          {/* Search Bar with Loop Emoji 🔄 */}
+          <div className="mb-8 flex items-center space-x-2">
+            <input
+              type="text"
+              value={searchLetter}
+              onChange={(e) => setSearchLetter(e.target.value)}
+              placeholder="Search by first letter 🔄"
+              className="px-4 py-2 w-full max-w-xs bg-white/10 text-white border border-white/30 rounded-lg backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-white/60 transition"
+            />
+          </div>
+
           <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {menuItems
-                .filter(item => item.category === activeCategory)
-                .map(item => (
-                  <div
-                    key={item.id}
-                    className="bg-white/5 rounded-xl p-6 border border-white/10 hover:bg-white/10 transition-colors"
-                  >
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="w-full h-48 object-cover rounded-lg mb-4"
-                    />
-                    <h3 className="text-xl font-semibold text-yellow-400 mb-2">{item.name}</h3>
-                    <p className="text-gray-300 text-sm mb-4">{item.description}</p>
-                    <div className="flex justify-between items-center">
-                      <span className="text-lg font-bold text-yellow-500">{item.price}€</span>
-                      <button
-                        onClick={() => addToCart(item)}
-                        className="bg-yellow-500 text-black px-4 py-2 rounded-full text-sm hover:bg-yellow-600 flex items-center transition-all"
-                      >
-                        <FaPlus className="mr-2" />
-                        Add
-                      </button>
-                      <button
-                        onClick={() => handleReservation(item)} // Redirect to Reservation
-                        className="bg-blue-500 text-white px-4 py-2 rounded-full text-sm hover:bg-blue-600 transition-all"
-                      >
-                        Reservation
-                      </button>
-                    </div>
+              {filteredMenuItems.map(item => (
+                <div
+                  key={item.id}
+                  className="bg-white/5 rounded-xl p-6 border border-white/10 hover:bg-white/10 transition-colors"
+                >
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    className="w-full h-48 object-cover rounded-lg mb-4"
+                  />
+                  <h3 className="text-xl font-semibold text-yellow-400 mb-2">{item.name}</h3>
+                  <p className="text-gray-300 text-sm mb-4">{item.description}</p>
+                  <div className="flex justify-between items-center">
+                    <span className="text-lg font-bold text-yellow-500">{item.price}€</span>
+                    <button
+                      onClick={() => addToCart(item)}
+                      className="bg-yellow-500 text-black px-4 py-2 rounded-full text-sm hover:bg-yellow-600 flex items-center transition-all"
+                    >
+                      <FaPlus className="mr-2" />
+                      Add
+                    </button>
                   </div>
-                ))}
+                </div>
+              ))}
             </div>
           </div>
         </div>

@@ -1,114 +1,188 @@
-import { useLocation, useNavigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
-import jsPDF from 'jspdf';
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import axios from "axios";
+import { jsPDF } from "jspdf";
 
 const Reservation = () => {
-  const location = useLocation();
-  const { item } = location.state || {};
-  const navigate = useNavigate();
-  const [reservationConfirmed, setReservationConfirmed] = useState(false);
+  const [formData, setFormData] = useState({
+    userId: "",
+    date: "",
+    time: "",
+    guests: 1,
+    notes: "",
+    phoneNumber: "",
+  });
 
   useEffect(() => {
-    const savedReservation = JSON.parse(localStorage.getItem('reservation'));
-    if (savedReservation) {
-      setReservationConfirmed(true); // Show confirmation message if data is already saved
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (user) {
+      setFormData((prev) => ({ ...prev, userId: user._id }));
     }
   }, []);
 
-  const handleReservationConfirm = () => {
-    const userId = localStorage.getItem('userId');
-    if (!userId) {
-      alert("User not logged in.");
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!formData.date || !formData.time || !formData.guests || !formData.phoneNumber) {
+      alert("Please fill in all required fields.");
       return;
     }
 
-    const newCommande = {
-      id_commande: Date.now(),
-      id_user: userId,
-      id_plat: item.id,
-      name: item.name,
-      price: item.price,
-      description: item.description,
-      image: item.image // Store the image URL here
-    };
+    const formattedPhoneNumber = `+216${formData.phoneNumber.replace(/^0/, '')}`;
+    const updatedFormData = { ...formData, phoneNumber: formattedPhoneNumber };
 
-    localStorage.setItem('reservation', JSON.stringify(newCommande));
-
-    setReservationConfirmed(true);
-
-    const allCommandes = JSON.parse(localStorage.getItem('commandes')) || [];
-    allCommandes.push(newCommande);
-    localStorage.setItem('commandes', JSON.stringify(allCommandes));
-
-    navigate('/orders');
+    try {
+      const response = await axios.post(
+        "http://localhost:3000/api/user/reservation",
+        updatedFormData
+      );
+      alert("Reservation confirmed!");
+      console.log(response.data);
+    } catch (error) {
+      console.error("Reservation failed:", error.response ? error.response.data : error.message);
+      alert("Reservation failed. Please try again.");
+    }
   };
 
+  // Generate PDF
   const generatePDF = () => {
     const doc = new jsPDF();
-    doc.text('Reservation Details', 10, 10);
-    doc.text(`Name: ${item.name}`, 10, 20);
-    doc.text(`Description: ${item.description}`, 10, 30);
-    doc.text(`Price: ${item.price}€`, 10, 40);
-
-    // Optional: Add an image to the PDF if available
-    if (item.image) {
-      doc.addImage(item.image, 'JPEG', 10, 50, 100, 50); // Adjust image size and position
-    }
-
-    doc.save('reservation.pdf'); // Save the PDF with the given name
+    doc.text("Reservation Details", 20, 20);
+    doc.text(`Phone Number: ${formData.phoneNumber}`, 20, 30);
+    doc.text(`Date: ${formData.date}`, 20, 40);
+    doc.text(`Time: ${formData.time}`, 20, 50);
+    doc.text(`Number of Guests: ${formData.guests}`, 20, 60);
+    doc.text(`Notes: ${formData.notes || "N/A"}`, 20, 70);
+    doc.save("reservation-details.pdf");
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen">
+    <div className="flex flex-col min-h-screen items-center justify-center py-16">
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat -z-10"
         style={{
-          backgroundImage: "url('/login1.jpg')",
-          boxShadow: "inset 0 0 0 2000px rgba(0, 0, 0, 0.3)",
+          backgroundImage: "url('/about-bg.jpg')",
+          boxShadow: "inset 0 0 0 2000px rgba(0, 0, 0, 0.4)",
         }}
       />
-      <div className="relative flex-grow flex items-center justify-center py-6 px-4 sm:px-6 lg:px-20">
-        <div className="w-full max-w-7xl mx-auto">
-          <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8">
-            <div className="bg-white/10 rounded-xl p-6 border border-white/10 hover:bg-white/10 transition-colors">
-              <h2 className="text-2xl font-semibold text-center mb-4 text-yellow-400">Reservation</h2>
-              {item ? (
-                <>
-                  <h3 className="text-xl font-semibold text-yellow-400 mb-2">{item.name}</h3>
-                  <p className="text-gray-300 text-sm mb-4">{item.description}</p>
-                  <div className="mt-4 flex justify-between items-center">
-                    <span className="text-lg font-bold text-yellow-500">{item.price}€</span>
-                    <button
-                      onClick={handleReservationConfirm}
-                      className="bg-blue-500 text-white px-4 py-2 rounded-full text-sm hover:bg-blue-600 transition-all"
-                    >
-                      Confirm Reservation
-                    </button>
-                  </div>
-                  <div className="mt-4">
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="w-full h-48 object-cover rounded-lg"
-                    />
-                  </div>
-                </>
-              ) : (
-                <p>No information available.</p>
-              )}
-              {reservationConfirmed && <p className="text-green-500 mt-4">Reservation confirmed!</p>}
-              {reservationConfirmed && (
-                <button
-                  onClick={generatePDF}
-                  className="bg-yellow-400 text-black px-6 py-2 rounded-full text-sm mt-4 hover:bg-yellow-500 transition-all"
-                >
-                  Download Reservation PDF
-                </button>
-              )}
-            </div>
+
+      <main className="relative flex flex-col items-center justify-center w-full px-4 sm:px-6 lg:px-8 pt-35">
+        <motion.div
+          className="border border-white/20 w-[90%] md:w-[70%] p-8 sm:p-10 rounded-2xl bg-white/10 backdrop-blur-xl shadow-lg"
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: "easeInOut" }}
+        >
+          <div className="flex flex-col items-center space-y-6 mb-8">
+            <h1 className="text-3xl font-bold text-white text-center">Make a Reservation</h1>
+            <p className="text-white/80 text-center">
+              Book your table at <span className="font-semibold text-yellow-500">TheMenuFy</span> and enjoy a premium dining experience.
+            </p>
           </div>
-        </div>
-      </div>
+
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            <div>
+              <label className="block text-white text-sm font-medium mb-2">Phone Number</label>
+              <input
+                type="text"
+                name="phoneNumber"
+                value={formData.phoneNumber}
+                onChange={handleChange}
+                placeholder="Enter your phone number"
+                required
+                className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg backdrop-blur-md text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/60 transition"
+              />
+            </div>
+
+            <div>
+              <label className="block text-white text-sm font-medium mb-2">Date</label>
+              <input
+                type="date"
+                name="date"
+                value={formData.date}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg backdrop-blur-md text-white focus:outline-none focus:ring-2 focus:ring-white/60 transition"
+              />
+            </div>
+
+            <div>
+              <label className="block text-white text-sm font-medium mb-2">Time</label>
+              <input
+                type="time"
+                name="time"
+                value={formData.time}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg backdrop-blur-md text-white focus:outline-none focus:ring-2 focus:ring-white/60 transition"
+              />
+            </div>
+
+            <div>
+              <label className="block text-white text-sm font-medium mb-2">Number of Guests</label>
+              <input
+                type="number"
+                name="guests"
+                min="1"
+                value={formData.guests}
+                onChange={handleChange}
+                placeholder="e.g. 2"
+                required
+                className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg backdrop-blur-md text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/60 transition"
+              />
+            </div>
+
+            <div>
+              <label className="block text-white text-sm font-medium mb-2">Notes</label>
+              <textarea
+                name="notes"
+                value={formData.notes}
+                onChange={handleChange}
+                placeholder="Any special requests?"
+                className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg backdrop-blur-md text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/60 transition"
+              />
+            </div>
+
+            <motion.button
+              type="submit"
+              className="w-full py-3 px-6 rounded-full transition-all duration-300 font-semibold border-2 bg-transparent hover:bg-yellow-500 text-yellow-500 hover:text-white border-yellow-500"
+              whileHover={{ scale: 1.05 }}
+            >
+              Confirm Reservation
+            </motion.button>
+          </form>
+
+          {/* PDF Button */}
+          <div className="mt-6 text-center">
+            <motion.button
+              onClick={generatePDF}
+              className="py-3 px-6 rounded-full transition-all duration-300 font-semibold border-2 bg-transparent hover:bg-yellow-500 text-yellow-500 hover:text-white border-yellow-500"
+              whileHover={{ scale: 1.05 }}
+            >
+              Download as PDF
+            </motion.button>
+          </div>
+
+          {/* Back Button */}
+          <div className="mt-12 text-center">
+            <motion.a
+              href="/"
+              className="py-3 px-6 rounded-full transition-all duration-300 font-semibold border-2 bg-transparent hover:bg-yellow-500 text-yellow-500 hover:text-white border-yellow-500 inline-block"
+              whileHover={{ scale: 1.1 }}
+            >
+              Back to Home
+            </motion.a>
+          </div>
+        </motion.div>
+      </main>
     </div>
   );
 };
