@@ -30,7 +30,6 @@ app.use('/api/users', usersRoutes);  // /api/users pour gérer les utilisateurs
 app.use('/api/payment', paymentRoutes);  // /api/users pour gérer les utilisateurs
 app.use('/api/dish', dishRoutes); 
 
-
 // Lancement du serveur
 app.listen(port, () => {
     console.log(` Serveur démarré sur http://localhost:${port}`);

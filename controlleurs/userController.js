@@ -5,6 +5,8 @@ const bcrypt = require('bcrypt');
 const sendEmail = require('../emailService');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
+const generatePdfBuffer = require('../utils/pdfGenerator');
+const sendSMS = require('../utils/sendSMS');
 
 require('dotenv').config();
 
@@ -327,71 +329,60 @@ const getByToken = async (req, res) => {
         res.status(500).json({ message: "Erreur serveur lors de la récupération de l'utilisateur." });
     }
 };
-const addReservation = async (req, res) => {
-    const { userId, reservationDate, numberOfGuests, tableNumber, specialRequests } = req.body;
 
-    try {
-        // Validate input fields
-        if (!userId || !reservationDate || !numberOfGuests || !tableNumber) {
-            throw new Error('All fields must be filled');
-        }
-
-        // Create the reservation
-        const reservation = await Reservation.create({
-            userId,
-            reservationDate,
-            numberOfGuests,
-            tableNumber,
-            specialRequests,
-        });
-
-        res.status(201).json({ message: 'Reservation added successfully', reservation });
-    } catch (error) {
-        res.status(400).json({ error: error.message });
+const bookReservation = async (req, res) => {
+    const { date, time, guests, notes, dishId } = req.body;
+  
+    // Validate required fields
+    if (!date || !time || !guests) {
+      return res.status(400).json({ message: "Date, time, and guests are required!" });
     }
-};
-
-// Fetch all reservations for a user
-const getReservationsByUser = async (req, res) => {
-    const { userId } = req.params;
-
-    try {
-        // Fetch all reservations by the user's ID
-        const reservations = await Reservation.find({ userId });
-
-        if (reservations.length === 0) {
-            return res.status(404).json({ message: 'No reservations found' });
-        }
-
-        res.status(200).json({ reservations });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
+  
+    if (guests <= 0) {
+      return res.status(400).json({ message: "Number of guests must be greater than zero!" });
     }
-};
-
-// Fetch a specific reservation by ID
-const getReservationById = async (req, res) => {
-    const { reservationId } = req.params;
-
+  
     try {
-        // Fetch a reservation by its ID
-        const reservation = await Reservation.findById(reservationId);
-
-        if (!reservation) {
-            return res.status(404).json({ message: 'Reservation not found' });
+      // Check if the dish exists (if applicable)
+      if (dishId) {
+        const dish = await Dish.findById(dishId);
+        if (!dish) {
+          return res.status(400).json({ message: "Selected dish not found!" });
         }
-
-        res.status(200).json({ reservation });
+      }
+  
+      // Create the reservation
+      const reservation = new Reservation({
+        userId: req.user._id,  // Assuming the user is authenticated and `req.user` is available
+        date,
+        time,
+        guests,
+        notes,
+        dishId
+      });
+  
+      await reservation.save();
+  
+      // Generate PDF buffer for confirmation
+      const pdfBuffer = await generatePdfBuffer(reservation);
+  
+      // Send Email confirmation
+      await sendEmail({
+        to: req.user.email,
+        subject: "Reservation Confirmation",
+        text: `Your reservation for ${date} at ${time} has been confirmed.`,
+        attachment: pdfBuffer
+      });
+  
+      // Send SMS confirmation (optional, depending on your setup)
+      await sendSms(req.user.tel, `Your reservation for ${date} at ${time} has been confirmed!`);
+  
+      res.status(201).json({ message: "Reservation successfully created!" });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+      console.error(error);
+      res.status(500).json({ message: "Failed to create reservation!" });
     }
-};
+  };
 
 
-
-
-
-
-
-
-module.exports = { signupUser,login_post,logout,forgotPassword,resetPassword,updateMonProfil,addReservation,getReservationsByUser,getByToken , getReservationById};
+module.exports = { signupUser,login_post,logout,forgotPassword,resetPassword,updateMonProfil,getByToken, bookReservation};
