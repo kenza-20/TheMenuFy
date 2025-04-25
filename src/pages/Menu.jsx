@@ -50,6 +50,8 @@ const Menu = () => {
       id_order: Date.now(),
       id_user: userId,
       id_dish: item.id,
+      image:item.image
+
     };
 
     localStorage.setItem('orders', JSON.stringify([...orders, newOrder]));
@@ -103,7 +105,7 @@ const Menu = () => {
               type="text"
               value={searchLetter}
               onChange={(e) => setSearchLetter(e.target.value)}
-              placeholder="Search by first letter 🔄"
+              placeholder="Search"
               className="px-4 py-2 w-full max-w-xs bg-white/10 text-white border border-white/30 rounded-lg backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-white/60 transition"
             />
           </div>

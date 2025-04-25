@@ -16,21 +16,21 @@ const Orders = () => {
       return;
     }
 
-    const allCommandes = JSON.parse(localStorage.getItem('commandes')) || [];
+    const allCommandes = JSON.parse(localStorage.getItem('orders')) || [];
     const commandesUser = allCommandes
       .filter(c => c.id_user === userId)
       .map(c => ({
         ...c,
-        plat: menuItems.find(p => p.id === c.id_plat),
+        plat: menuItems.find(p => p.id === c.id_dish),
       }));
 
     setUserCommandes(commandesUser);
   }, []);
 
   const handleDelete = (commandeId) => {
-    const updatedCommandes = userCommandes.filter(c => c.id_commande !== commandeId);
+    const updatedCommandes = userCommandes.filter(c => c.id_order !== commandeId);
     setUserCommandes(updatedCommandes);
-    localStorage.setItem('commandes', JSON.stringify(updatedCommandes));
+    localStorage.setItem('orders', JSON.stringify(updatedCommandes));
   };
 
   return (
