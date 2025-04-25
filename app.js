@@ -31,22 +31,11 @@ app.use('/api/payment', paymentRoutes);  // /api/users pour gérer les utilisate
 app.use('/api/dish', dishRoutes); 
 
 
+mongoose.connect('mongodb+srv://kenza:kenza2020@cluster0.65hm7.mongodb.net/themenufy?retryWrites=true&w=majority&appName=Cluster0')
+    .then(() => console.log(' Connecté à MongoDB'))
+    .catch(err => console.error(' Erreur de connexion', err));
+
 // Lancement du serveur
 app.listen(port, () => {
     console.log(` Serveur démarré sur http://localhost:${port}`);
 });
-
-
-
-// Connect to the MongoDB database
-mongoose.connect('mongodb://127.0.0.1:27017/PIWEB', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
-.then(() => {
-  console.log('\x1b[33m%s\x1b[0m', `Connected to MongoDB`)
-  ;})
-.catch((err) => {
-  console.log('\x1b[31m%s\x1b[0m','error mongodb connection',err)
-});
-
