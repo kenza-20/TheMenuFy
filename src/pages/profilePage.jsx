@@ -86,6 +86,24 @@ const Profile = () => {
                 <span className="text-yellow-500">Role:</span>
                 <p>{user.role}</p>
               </div>
+
+              {/* User Preferences */}
+              <div className="space-y-4 w-full mt-6">
+                <div className="bg-white/10 p-4 rounded-lg">
+                  <span className="text-yellow-500 font-semibold">Likes:</span>
+                  <p>{user.likes || "No preferences listed"}</p>
+                </div>
+
+                <div className="bg-white/10 p-4 rounded-lg">
+                  <span className="text-yellow-500 font-semibold">Dislikes:</span>
+                  <p>{user.dislikes || "No preferences listed"}</p>
+                </div>
+
+                <div className="bg-white/10 p-4 rounded-lg">
+                  <span className="text-yellow-500 font-semibold">Allergies:</span>
+                  <p>{user.allergies || "No allergies listed"}</p>
+                </div>
+              </div>
             </div>
 
             {/* Edit Profile Button */}

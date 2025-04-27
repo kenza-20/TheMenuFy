@@ -3,6 +3,8 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Button from "../components/button";
 import Footer from "../components/footer";
+import "react-intl-tel-input/dist/main.css";
+import ReactIntlTelInput from "react-intl-tel-input"; // Import the phone input component
 
 function Register() {
   const [formData, setFormData] = useState({
@@ -13,13 +15,13 @@ function Register() {
     confirmPassword: "",
     termsAccepted: false,
     role: "",
-    countryCode: "+216",
+    countryCode: "+216", // Default code
     phone: "",
   });
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [showTerms, setShowTerms] = useState(false); // <-- Popup state
+  const [showTerms, setShowTerms] = useState(false);
 
   const navigate = useNavigate();
 
@@ -64,6 +66,14 @@ function Register() {
     }
   };
 
+  const handlePhoneChange = (value, data) => {
+    setFormData((prev) => ({
+      ...prev,
+      phone: value,
+      countryCode: `+${data.dialCode}`, // Updates the country code when user selects the country
+    }));
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
       <div
@@ -73,7 +83,6 @@ function Register() {
           boxShadow: "inset 0 0 0 2000px rgba(0, 0, 0, 0.3)",
         }}
       />
-
       <main className="relative flex-grow flex justify-start">
         <div
           className="min-h-screen bg-white/ backdrop-blur-lg px-10 py-10 relative"
@@ -119,26 +128,15 @@ function Register() {
 
             <div className="flex flex-col items-start max-w-md ml-10">
               <label className="text-white text-sm font-medium mb-1">Phone</label>
-              <div className="flex w-full space-x-2">
-                <select
-                  name="countryCode"
-                  value={formData.countryCode}
-                  onChange={handleChange}
-                  className="p-2 rounded border border-white/30 bg-white/10 text-white"
-                >
-                  <option value="+216">🇹🇳 +216</option>
-                  <option value="+33">🇫🇷 +33</option>
-                  <option value="+1">🇺🇸 +1</option>
-                  <option value="+44">🇬🇧 +44</option>
-                </select>
-                <input
-                  type="tel"
-                  name="phone"
-                  placeholder="Phone number"
+              <div className="w-full">
+                {/* Phone Input with Flag Dropdown */}
+                <ReactIntlTelInput
                   value={formData.phone}
-                  onChange={handleChange}
-                  className="flex-grow p-2 rounded border border-white/30 bg-white/10 text-white placeholder-white/60"
-                  required
+                  onChange={handlePhoneChange}
+                  preferredCountries={["us", "tn", "fr", "de"]} // Add country codes you want to support
+                  defaultCountry="tn" // Default to Tunisia
+                  inputClassName="w-full p-2 rounded border border-white/30 bg-white/10 text-white placeholder-white/60"
+                  countryCodeEditable={false} // Prevent editing of the country code directly
                 />
               </div>
             </div>

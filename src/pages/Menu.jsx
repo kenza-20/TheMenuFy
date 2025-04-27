@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaPlus, FaHeart } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 
@@ -8,7 +8,8 @@ const Menu = () => {
   const [popupMessage, setPopupMessage] = useState('');
   const [searchLetter, setSearchLetter] = useState('');
   const [favorites, setFavorites] = useState([]);
-
+  const [notifications, setNotifications] = useState([]);
+  
   const navigate = useNavigate();
 
   const menuItems = [
@@ -111,7 +112,6 @@ const Menu = () => {
       navigate('/orders'); // Navigate to orders page after 3 seconds
     }, 3000);
   };
-  
 
   const addToFavorites = (item) => {
     const existingFavorites = JSON.parse(localStorage.getItem('favorites')) || [];
@@ -132,7 +132,6 @@ const Menu = () => {
     setTimeout(() => setShowPopup(false), 3000);
     navigate('/favorites');
   };
-  ;
 
   const handleImageClick = (item) => {
     navigate(`/dish/${item.id}`, { state: { item } });
@@ -142,6 +141,21 @@ const Menu = () => {
     item.name.toLowerCase().startsWith(searchLetter.toLowerCase()) &&
     item.category === activeCategory
   );
+
+  useEffect(() => {
+    const notificationListener = () => {
+      const newNotification = JSON.parse(localStorage.getItem('notification'));
+      if (newNotification) {
+        setNotifications((prev) => [...prev, newNotification]);
+        localStorage.removeItem('notification');
+      }
+    };
+
+    window.addEventListener('storage', notificationListener);
+    return () => {
+      window.removeEventListener('storage', notificationListener);
+    };
+  }, []);
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -213,7 +227,6 @@ const Menu = () => {
                       className="bg-red-500 text-white px-4 py-2 rounded-full text-sm hover:bg-red-600 flex items-center transition-all"
                     >
                       <FaHeart className="mr-2" />
-                      
                     </button>
                   </div>
                 </div>

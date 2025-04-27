@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { User, Menu, X } from "lucide-react";
+import { User, Menu, X, Bell } from "lucide-react"; 
 import { useDispatch } from "react-redux";
 
 const Navbar = ({ authenticated }) => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [notifications, setNotifications] = useState(5); // Dummy notification count
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false); // Manage notification dropdown visibility
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -85,35 +87,62 @@ const Navbar = ({ authenticated }) => {
             <Link to="/reservation" className="text-white hover:text-yellow-500 transition">Reservations</Link>
             <Link to="/orders" className="text-white hover:text-yellow-500 transition">Orders</Link>
             <Link to="/scan" className="text-white hover:text-yellow-500">
-  Scan QR
-</Link>
-
-
-
-</>
+              Scan QR
+            </Link>
+          </>
         )}
       </div>
 
-      {/* Desktop Profile */}
+      {/* Desktop Profile and Notifications */}
       <div className="hidden md:flex items-center space-x-6">
         {authenticated && (
-          <div className="relative">
-            <button
-              onClick={() => setIsProfileOpen(!isProfileOpen)}
-              className="w-9 h-9 flex items-center justify-center bg-gray-200 rounded-full hover:ring-2 hover:ring-yellow-500 transition"
-            >
-              <User className="text-gray-700" size={20} />
-            </button>
+          <>
+            {/* Notification Icon */}
+            <div className="relative">
+              <button
+                onClick={() => setIsNotificationOpen(!isNotificationOpen)} // Toggle notification dropdown
+                className="w-9 h-9 flex items-center justify-center bg-gray-200 rounded-full hover:ring-2 hover:ring-yellow-500 transition"
+              >
+                <Bell className="text-gray-700" size={20} />
+              </button>
+              {notifications > 0 && (
+                <span className="absolute top-0 right-0 w-4 h-4 bg-red-600 text-white text-xs rounded-full flex items-center justify-center">
+                  {notifications}
+                </span>
+              )}
 
-            {isProfileOpen && (
-              <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-lg py-2 text-black z-50">
-                <Link to="/ProfilePage" className="block px-4 py-2 hover:text-yellow-500" onClick={() => setIsProfileOpen(false)}>Profile</Link>
-                <Link to="/settings" className="block px-4 py-2 hover:text-yellow-500" onClick={() => setIsProfileOpen(false)}>Settings</Link>
-                <Link to="/Cart" className="block px-4 py-2 hover:text-yellow-500" onClick={() => setIsProfileOpen(false)}>Cart</Link>
-                <Link to="/login" onClick={() => { handleLogout(); setIsProfileOpen(false); }} className="block px-4 py-2 hover:text-yellow-500">Logout</Link>
-              </div>
-            )}
-          </div>
+              {/* Notification Dropdown */}
+              {isNotificationOpen && (
+                <div className="absolute top-10 right-0 mt-2 w-56 bg-white shadow-lg rounded-lg py-2 text-black z-50 transition-all ease-in-out duration-300">
+                  <div className="px-4 py-2">New notifications:</div>
+                  <ul className="text-sm">
+                    <li className="hover:bg-gray-100 px-4 py-2">You have 5 new messages</li>
+                    <li className="hover:bg-gray-100 px-4 py-2">Your order has been shipped</li>
+                    <li className="hover:bg-gray-100 px-4 py-2">New promotional offers available</li>
+                  </ul>
+                </div>
+              )}
+            </div>
+
+            {/* Profile Icon */}
+            <div className="relative">
+              <button
+                onClick={() => setIsProfileOpen(!isProfileOpen)}
+                className="w-9 h-9 flex items-center justify-center bg-gray-200 rounded-full hover:ring-2 hover:ring-yellow-500 transition"
+              >
+                <User className="text-gray-700" size={20} />
+              </button>
+
+              {isProfileOpen && (
+                <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-lg py-2 text-black z-50">
+                  <Link to="/ProfilePage" className="block px-4 py-2 hover:text-yellow-500" onClick={() => setIsProfileOpen(false)}>Profile</Link>
+                  <Link to="/settings" className="block px-4 py-2 hover:text-yellow-500" onClick={() => setIsProfileOpen(false)}>Settings</Link>
+                  <Link to="/Cart" className="block px-4 py-2 hover:text-yellow-500" onClick={() => setIsProfileOpen(false)}>Cart</Link>
+                  <Link to="/login" onClick={() => { handleLogout(); setIsProfileOpen(false); }} className="block px-4 py-2 hover:text-yellow-500">Logout</Link>
+                </div>
+              )}
+            </div>
+          </>
         )}
       </div>
 
