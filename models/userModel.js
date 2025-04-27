@@ -1,8 +1,5 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
-const validator = require("validator");
-
-const Schema = mongoose.Schema;
+const { Schema } = mongoose;
 
 const userSchema = new Schema({
   name: { type: String, required: true, trim: true },
@@ -14,12 +11,21 @@ const userSchema = new Schema({
   approved: { type: Boolean, default: false },
   confirmed: { type: Boolean, default: false },
   isBlocked: { type: Boolean, default: false },
-  resetCode: { type: String },  // Doit être défini ici
-  resetCodeExpiration: { type: Date },  // Doit être défini ici
-  token:{ type: String },
+  resetCode: { type: String },
+  resetCodeExpiration: { type: Date },
+  token: { type: String },
   image: { type: String },
 
-
+  // Favorites: an array of Dish references
+  favorites: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Dish' // Refers to your Dish model
+    }
+  ],
 });
 
-module.exports = mongoose.model('User', userSchema);
+// Create and export the User model
+const User = mongoose.model('User', userSchema);
+
+module.exports = User;

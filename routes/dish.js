@@ -23,7 +23,7 @@ router.get('/top-sellers', async (req, res) => {
   }
 });
 
-// Fetch similar dishes (add validation for dishId parameter)
+// Fetch similar dishes (add validation for category parameter)
 router.get('/:category/similar', async (req, res) => {
   const { category } = req.params;  // Get the category from the URL parameter
   try {
@@ -31,6 +31,20 @@ router.get('/:category/similar', async (req, res) => {
     res.status(200).json(similarDishes);  // Send the similar dishes to the frontend
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch similar dishes' });
+  }
+});
+
+// Fetch a specific dish by ID (added route for fetching a single dish by dishId)
+router.get('/:dishId', async (req, res) => {
+  const { dishId } = req.params; // Get dishId from the URL parameter
+  try {
+    const dish = await dishController.getDishById(dishId); // Ensure this method is implemented in your controller
+    if (!dish) {
+      return res.status(404).json({ error: 'Dish not found' });
+    }
+    res.status(200).json(dish); // Send the dish data to the frontend
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch dish' });
   }
 });
 

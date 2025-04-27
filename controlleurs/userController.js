@@ -53,9 +53,22 @@ const signupUser = async (req, res) => {
         // 📩 Notification par email
         if (role === 'restaurant' && !approved) {
             await sendEmail(email, "Approval Pending", 
-                `<h3>Hello ${name},</h3>
-                <p>Your account is pending admin approval. You'll receive an email once approved.</p>
-                <p>Best regards,<br><strong>Themenufy Team</strong></p>`
+                `<div style="max-width: 600px; margin: auto; font-family: Arial, sans-serif; border: 1px solid #eee; border-radius: 10px; overflow: hidden;">
+    <div style="background-color: #f4ce36; padding: 40px 0; text-align: center;">
+      <img src="https://img.icons8.com/ios-filled/100/ffffff/secured-letter.png" width="50" alt="Approval Icon" />
+    </div>
+    <div style="padding: 30px; text-align: center;">
+      <h2>Approval Pending</h2>
+      <p>Hi ${name},</p>
+      <p>Your account is currently pending approval by our admin team.</p>
+      <p>You’ll receive another email once your account is approved and ready to use.</p>
+      <p>Thank you for your patience!</p>
+    </div>
+    <div style="text-align: center; padding: 20px 10px; font-size: 12px; color: #aaa;">
+      <p><a href="#" style="color: #aaa; text-decoration: none;">Privacy Policy</a> | <a href="#" style="color: #aaa; text-decoration: none;">Contact</a></p>
+    </div>
+  </div>
+  `
             );
 
             return res.status(201).json({ 
@@ -198,10 +211,21 @@ const forgotPassword = async (req, res) => {
           to: email,
           subject: 'Password Reset Code',
           html: `
-              <h3>Password Reset Request</h3>
-              <p>We received a request to reset your password.</p>
-              <p>Your reset code is: <strong>${resetCode}</strong></p>
-              <p>If you didn't request a password reset, please ignore this email.</p>
+              <div style="max-width: 600px; margin: auto; font-family: Arial, sans-serif; border: 1px solid #eee; border-radius: 10px; overflow: hidden;">
+    <div style="background-color: #f4ce36; padding: 40px 0; text-align: center;">
+      <img src="https://img.icons8.com/ios-filled/100/ffffff/secured-letter.png" width="50" alt="Reset Icon" />
+    </div>
+    <div style="padding: 30px; text-align: center;">
+      <h2>Password Reset Request</h2>
+      <p>We received a request to reset your password.</p>
+      <p>Your reset code is:</p>
+      <p style="font-size: 24px; font-weight: bold; margin: 20px 0; color: #333;">${resetCode}</p>
+      <p>If you didn’t request a password reset, you can safely ignore this email.</p>
+    </div>
+    <div style="text-align: center; padding: 20px 10px; font-size: 12px; color: #aaa;">
+      <p><a href="#" style="color: #aaa; text-decoration: none;">Privacy Policy</a> | <a href="#" style="color: #aaa; text-decoration: none;">Contact</a></p>
+    </div>
+  </div>
           `
       };
 
