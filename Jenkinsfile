@@ -45,5 +45,23 @@ pipeline {
                 }
             }
         }
+        stage('Build & Push Docker Image') {
+    steps {
+        script {
+            def imageName = "kenza590/menufy-projet"
+            def imageTag = "latest"
+
+            withCredentials([usernamePassword(credentialsId: 'dockerHubCreds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                sh """
+                    echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                    docker build -t ${imageName}:${imageTag} .
+                    docker push ${imageName}:${imageTag}
+                    docker logout
+                """
+            }
+        }
+    }
+}
+
     }
 }
