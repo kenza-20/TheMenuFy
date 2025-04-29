@@ -12,7 +12,11 @@ const {
 let mongoServer;
 
 beforeAll(async () => {
-  mongoServer = await MongoMemoryServer.create();
+  mongoServer = await MongoMemoryServer.create({
+    binary: {
+      version: '4.4.10', // compatible sans AVX
+    },
+  });
   await mongoose.connect(mongoServer.getUri(), { dbName: 'test' });
 });
 
