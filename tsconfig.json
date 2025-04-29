@@ -1,0 +1,24 @@
+{
+    "compilerOptions": {
+      "target": "esnext",                        // Cible la version ES la plus moderne
+      "useDefineForClassFields": true,
+      "lib": ["dom", "esnext"],                  // Libérations DOM et ES modernes
+      "allowJs": true,                           // Permet l'utilisation de fichiers JS
+      "skipLibCheck": true,                      // Ignore les vérifications de types dans les fichiers de bibliothèques
+      "esModuleInterop": true,                   // Interopérabilité avec les modules ES
+      "allowSyntheticDefaultImports": true,      // Permet les imports par défaut pour les modules non-ES
+      "strict": true,                            // Active les vérifications strictes des types
+      "forceConsistentCasingInFileNames": true,  // Empêche les incohérences dans les majuscules/minuscules des noms de fichiers
+      "moduleResolution": "node",                // Utilise la résolution des modules type Node.js
+      "resolveJsonModule": true,                 // Permet l'importation de fichiers JSON
+      "isolatedModules": true,                   // Empêche les erreurs dues aux modules isolés
+      "jsx": "react-jsx",                        // Active le support JSX avec React 17+ (ajuste si tu utilises une version antérieure de React)
+      "baseUrl": ".",                            // Définit le répertoire racine pour la résolution des modules
+      "paths": {
+        "@/*": ["src/*"]                         // Permet l'importation des fichiers à partir du dossier src avec un alias @
+      }
+    },
+    "include": ["src/**/*"],                      // Inclut tous les fichiers sous le dossier src
+    "exclude": ["node_modules"]                   // Exclut le dossier node_modules
+  }
+  
