@@ -1,0 +1,9 @@
+const express = require('express');
+const router = express.Router();
+const { getAllTips, createTip , deleteTip } = require('../controlleurs/tipController'); // Import the controller functions
+
+// Routes
+router.get('/tips', getAllTips); // Public route to get all tips
+router.post('/tips', createTip); // Use the createTip function from the controller
+router.delete('/tips/:id', deleteTip);    // Delete a tip by ID
+module.exports = router;
