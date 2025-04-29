@@ -109,7 +109,7 @@ const Menu = () => {
 
     setTimeout(() => {
       setShowPopup(false);
-      navigate('/orders'); // Navigate to orders page after 3 seconds
+       // Navigate to orders page after 3 seconds
     }, 3000);
   };
 
@@ -130,7 +130,7 @@ const Menu = () => {
     setPopupMessage(`Added to favorites: ${item.name}`);
     setShowPopup(true);
     setTimeout(() => setShowPopup(false), 3000);
-    navigate('/favorites');
+    
   };
 
   const handleImageClick = (item) => {
