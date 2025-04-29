@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        SONAR_URL = 'http://localhost:9000'
+        SONAR_URL = 'http://10.0.2.15/:9000'
     }
 
     stages {
