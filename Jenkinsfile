@@ -12,5 +12,18 @@ pipeline {
                 )
             }
         }
+        stage('Install Dependencies') {
+            steps {
+                echo 'Installing dependencies...'
+                sh 'npm install --force'
+            }
+        }
+
+        stage('Unit Tests') {
+            steps {
+                echo 'Running unit tests...'
+                sh 'npm test'
+            }
+        }
     }
 }
