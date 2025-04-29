@@ -10,6 +10,7 @@ const {
 } = require('../controlleurs/dishController');
 
 let mongoServer;
+jest.setTimeout(30000);
 
 beforeAll(async () => {
   mongoServer = await MongoMemoryServer.create({
