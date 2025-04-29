@@ -26,23 +26,22 @@ pipeline {
             }
         }
         
-        stage('SonarQube Analysis') {
+stage('SonarQube Analysis') {
     steps {
         echo 'Running SonarQube analysis...'
-        withSonarQubeEnv('MySonarQube') {
-            withCredentials([string(credentialsId: 'sonarToken', variable: 'SONAR_TOKEN')]) {
-                sh '''
-                    ${SONARQUBE_SCANNER_HOME}/bin/sonar-scanner \
-                        -Dsonar.projectKey=TheMenuFy \
-                        -Dsonar.sources=. \
-                        -Dsonar.host.url=http://localhost:9000 \
-                        -Dsonar.login=$SONAR_TOKEN \
-                        -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
-                '''
-            }
+        withCredentials([string(credentialsId: 'sonarToken', variable: 'SONAR_TOKEN')]) {
+            sh '''
+                sonar-scanner \
+                    -Dsonar.projectKey=TheMenuFy \
+                    -Dsonar.sources=. \
+                    -Dsonar.host.url=http://localhost:9000 \
+                    -Dsonar.login=$SONAR_TOKEN \
+                    -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+            '''
         }
     }
 }
+
 
     }
 }
