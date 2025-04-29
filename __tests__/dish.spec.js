@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { MongoMemoryServer } = require('mongodb-memory-server');
+const mongoose = require('mongoose');
 const Dish = require('../models/dishModel');
 const {
   markTopSeller,
@@ -12,19 +12,23 @@ const {
 let mongoServer;
 
 beforeAll(async () => {
-  mongoServer = await MongoMemoryServer.create();
-  await mongoose.connect(mongoServer.getUri(), { dbName: 'test' });
-});
-
-afterAll(async () => {
-  await mongoose.disconnect();
-  await mongoServer.stop();
+  await mongoose.connect('mongodb://localhost:27017/test', {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  });
 });
 
 afterEach(async () => {
-  await Dish.deleteMany();
+  // Nettoyer les collections entre chaque test
+  const collections = await mongoose.connection.db.collections();
+  for (let collection of collections) {
+    await collection.deleteMany({});
+  }
 });
 
+afterAll(async () => {
+  await mongoose.connection.close();
+});
 describe('Dish Controller', () => {
   test('markTopSeller should mark only one dish as top seller', async () => {
     const dish1 = await Dish.create({
