@@ -29,7 +29,7 @@ pipeline {
 stage('SonarQube Analysis') {
     steps {
         echo 'Running SonarQube analysis...'
-        withCredentials([string(credentialsId: 'sonarToken', variable: 'SONAR_TOKEN')]) {
+        withCredentials([string(credentialsId: 'credentialsId', variable: 'SONAR_TOKEN')]) {
             sh '''
                 sonar-scanner \
                     -Dsonar.projectKey=TheMenuFy \
