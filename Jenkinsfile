@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    environment {
+        SONAR_URL = 'http://localhost:9000'
+    }
+
     stages {
         stage('Checkout GIT') {
             steps {
@@ -12,6 +16,7 @@ pipeline {
                 )
             }
         }
+
         stage('Install Dependencies') {
             steps {
                 echo 'Installing dependencies...'
@@ -25,23 +30,20 @@ pipeline {
                 sh 'npm test'
             }
         }
-        
-stage('SonarQube Analysis') {
-    steps {
-        echo 'Running SonarQube analysis...'
-        withCredentials([string(credentialsId: 'credentialsId', variable: 'SONAR_TOKEN')]) {
-            sh '''
-                sonar-scanner \
-                    -Dsonar.projectKey=TheMenuFy \
-                    -Dsonar.sources=. \
-                    -Dsonar.host.url=http://localhost:9000 \
-                    -Dsonar.login=$SONAR_TOKEN \
-                    -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
-            '''
+
+        stage('SonarQube Analysis via Docker') {
+            steps {
+                echo 'Running SonarQube analysis with Docker...'
+                withCredentials([string(credentialsId: 'sonarToken', variable: 'SONAR_TOKEN')]) {
+                    sh '''
+                        docker run --rm \
+                          -e SONAR_HOST_URL=$SONAR_URL \
+                          -e SONAR_LOGIN=$SONAR_TOKEN \
+                          -v "$(pwd):/usr/src" \
+                          sonarsource/sonar-scanner-cli
+                    '''
+                }
+            }
         }
-    }
-}
-
-
     }
 }
