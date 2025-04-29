@@ -8,6 +8,7 @@ const recipeController = require('../controlleurs/RecipeController');
 // Get all recipes 
 router.get('/all', recipeController.getAllRecipes);
 router.get('/:id', recipeController.getRecipeById);
+router.get('/price_id/:price_id', recipeController.getRecipeByPriceId);
 
 // Update a recipe by ID
 // router.put('/:id', recipeController.updateRecipe);

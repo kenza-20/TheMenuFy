@@ -39,10 +39,21 @@ exports.getAllRecipes = async (req, res) => {
   }
 };
 
+
 exports.getRecipeById = async (req, res) => {
 const { id } = req.params;
   try {
-    const recipe = await Recipe.find({_id: id});
+    const recipe = await Recipe.findOne({_id: id});
+    res.status(200).json(recipe);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error fetching recipe", error: error.message });
+  }
+};
+exports.getRecipeByPriceId = async (req, res) => {
+const { price_id } = req.params;
+  try {
+    const recipe = await Recipe.find({price_id: price_id});
     res.status(200).json(recipe);
   } catch (error) {
     console.error(error);

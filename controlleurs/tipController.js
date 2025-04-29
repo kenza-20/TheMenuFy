@@ -46,4 +46,5 @@ const deleteTip = async (req, res) => {
   }
 };
 
+
 module.exports = { getAllTips, createTip, deleteTip };
