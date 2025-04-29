@@ -34,7 +34,7 @@ pipeline {
         stage('SonarQube Analysis via Docker') {
             steps {
                 echo 'Running SonarQube analysis with Docker...'
-                withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_TOKEN')]) {
+                withCredentials([string(credentialsId: 'sonarr', variable: 'SONAR_TOKEN')]) {
     sh """
         docker run --rm \
           -e SONAR_HOST_URL=http://10.0.2.15:9000 \
