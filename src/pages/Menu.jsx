@@ -172,13 +172,14 @@ const Menu = () => {
       // Optionally update the orders state to reflect the new order
       setOrders([...orders, newOrder]);
   
-      setPopupMessage(`Order added: ${item.name}`);
-      setShowPopup(true);
-  
-      setTimeout(() => {
-        setShowPopup(false);
-        // navigate('/orders'); // Navigate to orders page after 3 seconds (optional)
-      }, 3000);
+       Swal.fire({
+             icon: 'success',
+             title: 'Added to Cart!',
+             text: `The item ${item.name} was added to your cart.`,
+             confirmButtonText: 'Ok',
+           }).then(() => {
+            //  navigate('/resto/2/menu'); // redirect only after user clicks 'Ok'
+           });
     } catch (error) {
       console.error('Error adding order:', error);
     }
@@ -205,7 +206,8 @@ const Menu = () => {
   };
 
   const handleImageClick = (item) => {
-    navigate(`/dish/${item.id}`, { state: { item } });
+    console.log(item._id,"CLICKED")
+    navigate(`/dish/${item._id}`, { state: { item } });
   };
 
   const filteredMenuItems = menuItems.filter(item =>
