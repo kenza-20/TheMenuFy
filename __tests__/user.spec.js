@@ -22,8 +22,12 @@ app.post('/api/logout', userController.logout);
 let mongoServer;
 
 beforeAll(async () => {
-    mongoServer = await MongoMemoryServer.create();
-    await mongoose.connect(mongoServer.getUri(), { dbName: "verifyDB" });
+  mongoServer = await MongoMemoryServer.create({
+    binary: {
+      version: '4.4.10', // compatible sans AVX
+    },
+  });
+  await mongoose.connect(mongoServer.getUri(), { dbName: 'test' });
 });
 
 afterAll(async () => {
