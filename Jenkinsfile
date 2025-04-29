@@ -36,12 +36,11 @@ pipeline {
                 echo 'Running SonarQube analysis with Docker...'
                 withCredentials([string(credentialsId: 'sonarr', variable: 'SONAR_TOKEN')]) {
     sh """
-        docker run --rm \
-          -e SONAR_HOST_URL=http://10.0.2.15:9000 \
-          -e SONAR_LOGIN=${SONAR_TOKEN} \
-          -v \$(pwd):/usr/src \
-          sonarsource/sonar-scanner-cli
-    """
+        sonar-scanner \
+  -Dsonar.projectKey=menufy-projet \
+  -Dsonar.sources=. \
+  -Dsonar.host.url=http://10.0.2.15:9000 \
+  -Dsonar.login=30a83d93ddf7059a333a56a673f087edab0335bd
 }
 
             }
