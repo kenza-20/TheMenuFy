@@ -6,33 +6,10 @@ pipeline {
     }
 
     stages {
-        stage('Checkout GIT') {
-            steps {
-                echo 'Pulling the code...'
-                script {
-                    def branchName = env.GIT_BRANCH.replace("origin/", "") // Remove origin/ prefix
-                    if (branchName == 'devopsFont') {
-                        git(
-                            branch: 'devopsFont',
-                            url: 'https://github.com/kenza-20/TheMenuFy.git',
-                            credentialsId: 'gitToken'
-                        )
-                    } else if (branchName == 'devops') {
-                        git(
-                            branch: 'devops',
-                            url: 'https://github.com/kenza-20/TheMenuFy.git',
-                            credentialsId: 'gitToken'
-                        )
-                    }
-                }
-            }
-        }
 
         stage('Diagnostic') {
             steps {
-                script {
-                    echo "GIT_BRANCH: ${env.GIT_BRANCH}"
-                }
+                echo "BRANCH_NAME: ${env.BRANCH_NAME}"
             }
         }
 
@@ -45,7 +22,7 @@ pipeline {
 
         stage('SonarQube Analysis Front') {
             when {
-                expression { env.GIT_BRANCH?.replace("origin/", "")?.trim() == 'devopsFont' }
+                expression { env.BRANCH_NAME == 'devopsFont' }
             }
             steps {
                 echo 'Running SonarQube analysis for Frontend...'
@@ -64,7 +41,7 @@ pipeline {
 
         stage('SonarQube Analysis Back') {
             when {
-                expression { env.GIT_BRANCH?.replace("origin/", "")?.trim() == 'devops' }
+                expression { env.BRANCH_NAME == 'devops' }
             }
             steps {
                 echo 'Running SonarQube analysis for Backend...'
@@ -101,7 +78,7 @@ pipeline {
 
         stage('Build & Push Front Docker Image') {
             when {
-                expression { env.GIT_BRANCH?.replace("origin/", "")?.trim() == 'devopsFont' }
+                expression { env.BRANCH_NAME == 'devopsFont' }
             }
             steps {
                 script {
