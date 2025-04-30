@@ -59,6 +59,9 @@ pipeline {
         }
 
         stage('Build & Push Docker Image') {
+             when {
+                expression { env.BRANCH_NAME == 'devops' }
+            }
             steps {
                 script {
                     def imageName = "kenza590/menufy-projet"
