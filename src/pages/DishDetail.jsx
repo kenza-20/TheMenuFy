@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { ArrowLeft, Info } from "lucide-react"
 import { Button } from "../components/ui/button"
 import BlurContainer from "../components/blurContainer"
-import { Link, useLocation, useParams,useNavigate } from "react-router-dom";
+import { Link, useParams,useNavigate } from "react-router-dom";
 import axios from 'axios'
 import Swal from 'sweetalert2';
 
@@ -15,9 +15,7 @@ const  DishDetail = () => {
   const navigate = useNavigate(); // To navigate between pages
   const id_user = typeof window !== "undefined" ? localStorage.getItem("userId") : null;
   const [orders, setOrders] = useState([]);
-    const [popupMessage, setPopupMessage] = useState('');
-    const [showPopup, setShowPopup] = useState(false);
-  
+
   useEffect(() => {
     axios.get(`http://localhost:3000/api/orders/${id_user}`)
       .then(response => {

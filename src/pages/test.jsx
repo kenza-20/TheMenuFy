@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaGoogle, FaFacebook } from "react-icons/fa"; // Import icons
 import Button from "../components/button";
 import Footer from "../components/footer";
 import GoogleAuthButton from "../components/GoogleAuthButton";

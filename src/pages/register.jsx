@@ -12,10 +12,9 @@ function Register() {
     password: "",
     confirmPassword: "",
     termsAccepted: false,
-    role: "",
     countryCode: "+216",
     tel: "",
-    role: "client",           // ajouter un rôle par défaut (exemple : "client")
+    role: "client",
 
   });
 

@@ -140,7 +140,6 @@ const MealCalendar = () => {
 
   // Load user data from localStorage
   const user = typeof window !== "undefined" ? localStorage.getItem("userId") : null;
-  //   const user = JSON.parse(localStorage.getItem('userId'));
 
   // Fetch meals from API
   useEffect(() => {

@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "../components/button";
-import Footer from "../components/footer";
 import BlurContainer from "../components/blurContainer";
 import { FaEnvelope } from "react-icons/fa";
 

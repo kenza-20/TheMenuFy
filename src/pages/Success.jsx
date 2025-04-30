@@ -69,7 +69,6 @@ const Success = () => {
       axios.post("http://localhost:3000/api/placedOrders/create", order)
         .then(() => {
           console.log("Order saved");
-          // localStorage.removeItem("invoiceData");
         })
         .catch((error) => {
           console.error("Error saving order:", error);

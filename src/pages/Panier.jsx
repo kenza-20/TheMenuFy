@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import Button from "../components/button";
 import BlurContainer from "../components/blurContainer";
 import swal from 'sweetalert';
-import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import { loadStripe } from '@stripe/stripe-js';
 import axios from 'axios';
@@ -16,7 +14,6 @@ import Swal from 'sweetalert2';
 const Panier = () => {
   const [meals, setMeals] = useState([]);
   const [quantities, setQuantities] = useState({});
-  const navigate = useNavigate();
   const id_user = typeof window !== "undefined" ? localStorage.getItem("userId") : null;
 
   useEffect(() => {
@@ -154,37 +151,7 @@ const Panier = () => {
     }
   };
 
-  // const generateInvoicePDF = () => {
-  //   const doc = new jsPDF();
-  //   doc.setFontSize(18);
-  //   doc.text('Invoice', 14, 22);
 
-  //   const headers = [['Meal', 'Quantity', 'Price (CAD)', 'Subtotal']];
-  //   const data = meals
-  //     .filter(meal => quantities[meal.id] > 0)
-  //     .map(meal => [
-  //       meal.name,
-  //       quantities[meal.id],
-  //       `$${meal.price.toFixed(2)}`,
-  //       `$${(meal.price * quantities[meal.id]).toFixed(2)}`
-  //     ]);
-
-  //   const now = new Date();
-  //   const formattedDate = now.toLocaleDateString();
-  //   const formattedTime = now.toLocaleTimeString();
-  //   doc.setFontSize(11);
-  //   doc.text(`Date: ${formattedDate}   Time: ${formattedTime}`, 14, 27);
-
-  //   doc.autoTable({
-  //     head: headers,
-  //     body: data,
-  //     startY: 30
-  //   });
-
-  //   doc.text(`Total: $${total}`, 14, doc.lastAutoTable.finalY + 10);
-
-  //   doc.save('invoice.pdf');
-  // };
 
   return (
     <div className="relative min-h-screen bg-cover bg-center flex items-center justify-center" style={{ backgroundImage: "url('/about-bg.jpg')" }}>

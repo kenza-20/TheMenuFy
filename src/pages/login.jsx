@@ -1,16 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { Link,useNavigate } from "react-router-dom";
-import { FaGoogle, FaFacebook, FaEye, FaEyeSlash } from "react-icons/fa";
+import {useNavigate } from "react-router-dom";
+import {FaEye, FaEyeSlash } from "react-icons/fa";
 import Button from "../components/button";
-import Footer from "../components/footer";
 import GoogleAuthButton from "../components/GoogleAuthButton";
 import FacebookAuthButton from "../components/FacebookAuthButton";
 
-import { connect, useDispatch } from 'react-redux';
-import { useSelector } from 'react-redux';  // Use redux selector for auth
-import { loadingToggleAction,loginAction,} from '../actions/AuthActions'; 
-import axios from "axios";
-import swal from 'sweetalert'
+import { useDispatch,useSelector } from 'react-redux';
+import { loadingToggleAction,loginAction,} from '../actions/AuthActions';
+
 
 
 function Login() {
@@ -26,9 +23,9 @@ function Login() {
 
   const [showPassword, setShowPassword] = useState(false); // Eye icon toggle
   const navigate = useNavigate();
- 
+
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
- 
+
   useEffect(() => {
     console.log("useEffect triggered, isAuthenticated:", isAuthenticated); // ✅ Debugging
     if (isAuthenticated) {
@@ -54,54 +51,14 @@ function Login() {
     if (error) {
   return ;
   }
-  dispatch(loadingToggleAction(true));	
-  // const success = await 
+  dispatch(loadingToggleAction(true));
+  // const success = await
   dispatch(loginAction(email, password,navigate));
-  
-  // if (success) {
-  //   console.log("Login successful! Waiting for navigation...");
-  // } else {
-  //   setLoading(false); // ✅ Stop loading if login failed
-  //   setError("Invalid credentials. Please try again.");
-  // }
+
+
   }
-  
 
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   setError("");
 
-  //   try {
-  //     const response = await fetch("http://localhost:3000/api/user/login", {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify({ email, password, token: token || undefined }),
-  //     });
-
-  //     const data = await response.json();
-
-  //     if (response.ok) {
-  //       localStorage.setItem("token", data.token);
-  //       localStorage.setItem("role", data.user.role);
-
-  //       if (data.user.role === "admin") {
-  //         navigate("/admin");
-  //       } else if (data.user.role === "superadmin") {
-  //         navigate("/superadmin");
-  //       } else {
-  //         navigate("/home");
-  //       }
-  //     } else if (data.message === "2FA code required") {
-  //       setShow2FA(true);
-  //     } else {
-  //       setError(data.message || "Login failed");
-  //     }
-  //   } catch (err) {
-  //     setError("Server error, please try again later.");
-  //   }
-  // };
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -177,7 +134,7 @@ function Login() {
                       className="w-full px-4 py-3 bg-white/10 border border-gray-300/30 rounded-lg focus:ring-yellow-500 focus:border-yellow-500 text-white placeholder-gray-400"
                       placeholder="Enter your 2FA code"
                       required
-                    />
+              />
                   </div>
                 )}
 
