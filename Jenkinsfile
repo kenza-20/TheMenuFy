@@ -9,9 +9,8 @@ pipeline {
         stage('Checkout GIT') {
             steps {
                 echo 'Pulling the code...'
-                echo "Branch actuelle détectée : '${env.BRANCH_NAME}'"
                 script {
-                    def branchName = env.BRANCH_NAME.trim()
+                    def branchName = env.BRANCH_NAME
                     if (branchName == 'devopsFont') {
                         git(
                             branch: 'devopsFont',
@@ -38,7 +37,7 @@ pipeline {
 
         stage('SonarQube Analysis Front') {
             when {
-                expression { env.BRANCH_NAME.trim() == 'devopsFont' }
+                expression { env.BRANCH_NAME?.trim() == 'devopsFont' }
             }
             steps {
                 echo 'Running SonarQube analysis for Frontend...'
@@ -57,7 +56,7 @@ pipeline {
 
         stage('SonarQube Analysis Back') {
             when {
-                expression { env.BRANCH_NAME.trim() == 'devops' }
+                expression { env.BRANCH_NAME?.trim() == 'devops' }
             }
             steps {
                 echo 'Running SonarQube analysis for Backend...'
@@ -75,9 +74,6 @@ pipeline {
         }
 
         stage('Build & Push Docker Image') {
-            when {
-                expression { env.BRANCH_NAME.trim() == 'devops' }
-            }
             steps {
                 script {
                     def imageName = "kenza590/menufy-projet"
@@ -97,7 +93,7 @@ pipeline {
 
         stage('Build & Push Front Docker Image') {
             when {
-                expression { env.BRANCH_NAME.trim() == 'devopsFont' }
+                expression { env.BRANCH_NAME?.trim() == 'devopsFont' }
             }
             steps {
                 script {
