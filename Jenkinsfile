@@ -10,7 +10,7 @@ pipeline {
             steps {
                 echo 'Pulling the code...'
                 script {
-                    def branchName = env.BRANCH_NAME
+                    def branchName = env.GIT_BRANCH
                     if (branchName == 'devopsFont') {
                         git(
                             branch: 'devopsFont',
@@ -27,15 +27,14 @@ pipeline {
                 }
             }
         }
-        stage('Diagnostic') {
-    steps {
-        script {
-            echo "BRANCH_NAME: ${env.BRANCH_NAME}"
-            echo "GIT_BRANCH: ${env.GIT_BRANCH}"
-        }
-    }
-}
 
+        stage('Diagnostic') {
+            steps {
+                script {
+                    echo "GIT_BRANCH: ${env.GIT_BRANCH}"
+                }
+            }
+        }
 
         stage('Install Dependencies') {
             steps {
@@ -46,7 +45,7 @@ pipeline {
 
         stage('SonarQube Analysis Front') {
             when {
-                expression { env.BRANCH_NAME?.trim() == 'devopsFont' }
+                expression { env.GIT_BRANCH?.trim() == 'devopsFont' }
             }
             steps {
                 echo 'Running SonarQube analysis for Frontend...'
@@ -65,7 +64,7 @@ pipeline {
 
         stage('SonarQube Analysis Back') {
             when {
-                expression { env.BRANCH_NAME?.trim() == 'devops' }
+                expression { env.GIT_BRANCH?.trim() == 'devops' }
             }
             steps {
                 echo 'Running SonarQube analysis for Backend...'
@@ -91,7 +90,7 @@ pipeline {
                     withCredentials([usernamePassword(credentialsId: 'dockerHubCreds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                         sh """
                             echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                            docker build -t ${imageName}:${imageTag} .
+                            docker build -t ${imageName}:${imageTag} . 
                             docker push ${imageName}:${imageTag}
                             docker logout
                         """
@@ -102,7 +101,7 @@ pipeline {
 
         stage('Build & Push Front Docker Image') {
             when {
-                expression { env.BRANCH_NAME?.trim() == 'devopsFont' }
+                expression { env.GIT_BRANCH?.trim() == 'devopsFont' }
             }
             steps {
                 script {
@@ -112,7 +111,7 @@ pipeline {
                     withCredentials([usernamePassword(credentialsId: 'dockerHubCreds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                         sh """
                             echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                            docker build -t ${imageName}:${imageTag} .
+                            docker build -t ${imageName}:${imageTag} . 
                             docker push ${imageName}:${imageTag}
                             docker logout
                         """
