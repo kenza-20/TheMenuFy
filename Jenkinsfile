@@ -10,7 +10,7 @@ pipeline {
             steps {
                 echo 'Pulling the code...'
                 script {
-                    def branchName = env.GIT_BRANCH
+                    def branchName = env.GIT_BRANCH.replace("origin/", "") // Remove origin/ prefix
                     if (branchName == 'devopsFont') {
                         git(
                             branch: 'devopsFont',
@@ -45,7 +45,7 @@ pipeline {
 
         stage('SonarQube Analysis Front') {
             when {
-                expression { env.GIT_BRANCH?.trim() == 'devopsFont' }
+                expression { env.GIT_BRANCH?.replace("origin/", "")?.trim() == 'devopsFont' }
             }
             steps {
                 echo 'Running SonarQube analysis for Frontend...'
@@ -64,7 +64,7 @@ pipeline {
 
         stage('SonarQube Analysis Back') {
             when {
-                expression { env.GIT_BRANCH?.trim() == 'devops' }
+                expression { env.GIT_BRANCH?.replace("origin/", "")?.trim() == 'devops' }
             }
             steps {
                 echo 'Running SonarQube analysis for Backend...'
@@ -101,7 +101,7 @@ pipeline {
 
         stage('Build & Push Front Docker Image') {
             when {
-                expression { env.GIT_BRANCH?.trim() == 'devopsFont' }
+                expression { env.GIT_BRANCH?.replace("origin/", "")?.trim() == 'devopsFont' }
             }
             steps {
                 script {
