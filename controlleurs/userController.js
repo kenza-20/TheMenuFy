@@ -274,12 +274,8 @@ const resetPassword = async (req, res) => {
 // Fonction pour mettre à jour le profil de l'utilisateur
 // Fonction pour mettre à jour le profil de l'utilisateur
 const updateMonProfil = async (req, res) => {
-  const { name, surname, email, password, allergies, foodLikes, foodHates } = req.body;
+  const { name, surname, email, password, allergies, foodLikes, foodHates, tel, image } = req.body;
   const token = req.headers.authorization?.split(" ")[1];
-
-  if (req.file) {
-    req.body.image = `/uploads/${req.file.filename}`;
-  }
 
   if (!token) {
     return res.status(401).json({ message: "Token manquant" });
@@ -292,6 +288,7 @@ const updateMonProfil = async (req, res) => {
       return res.status(404).json({ message: "Utilisateur non trouvé" });
     }
 
+    // Vérifie l’unicité de l’email si modifié
     if (email && email !== user.email) {
       const existingUser = await User.findOne({ email });
       if (existingUser) {
@@ -299,17 +296,20 @@ const updateMonProfil = async (req, res) => {
       }
     }
 
+    // Mise à jour des champs
     if (name) user.name = name;
     if (surname) user.surname = surname;
     if (email) user.email = email;
+    if (tel) user.tel = tel;
     if (password) {
       const salt = await bcrypt.genSalt(10);
       user.password = await bcrypt.hash(password, salt);
     }
-    if (req.body.image) user.image = req.body.image;
+
+    if (image) user.image = image;  // 🟡 ADD THIS LINE
+    if (foodLikes) user.foodLikes = foodLikes;
+    if (foodHates) user.foodHates = foodHates;
     if (allergies) user.allergies = allergies;
-    if (foodLikes) user.foodLikes = foodLikes; // Update foodLikes
-    if (foodHates) user.foodHates = foodHates; // Update foodHates
 
     await user.save();
 
@@ -322,43 +322,46 @@ const updateMonProfil = async (req, res) => {
 
 
 
+
 const getByToken = async (req, res) => {
-    const token = req.headers.authorization?.split(" ")[1]; // Récupérer le token depuis l'en-tête Authorization
+  const token = req.headers.authorization?.split(" ")[1];
 
-    console.log("token reçu :", token);
+  console.log("token reçu :", token);
 
-    if (!token) {
-        return res.status(400).json({ message: "Token manquant." });
+  if (!token) {
+    return res.status(400).json({ message: "Token manquant." });
+  }
+
+  try {
+    const user = await User.findOne({ token });
+
+    if (!user) {
+      return res.status(404).json({ message: "Utilisateur non trouvé." });
     }
 
-    try {
-        // Rechercher l'utilisateur ayant ce token
-        const user = await User.findOne({ token });
+    res.status(200).json({
+      user: {
+        id: user._id,
+        image: user.image,
+        name: user.name,
+        surname: user.surname,
+        email: user.email,
+        role: user.role,
+        tel: user.tel,
+        confirmed: user.confirmed,
+        password: user.password,
+        foodLikes: user.foodLikes || "",  // ✅ ajouté
+        foodHates: user.foodHates || "",  // ✅ ajouté
+        allergies: user.allergies || []   // ✅ déjà là, mais vérifié
+      }
+    });
 
-        if (!user) {
-            return res.status(404).json({ message: "Utilisateur non trouvé." });
-        }
-
-        // Retourner les infos utilisateur
-        res.status(200).json({
-            user: {
-                id: user._id,
-                image: user.image,
-                name: user.name,
-                surname: user.surname,
-                email: user.email,
-                role: user.role,
-                tel: user.tel,
-                confirmed: user.confirmed,
-                password:user.password
-            }
-        });
-
-    } catch (error) {
-        console.error("Erreur dans getByToken:", error);
-        res.status(500).json({ message: "Erreur serveur lors de la récupération de l'utilisateur." });
-    }
+  } catch (error) {
+    console.error("Erreur dans getByToken:", error);
+    res.status(500).json({ message: "Erreur serveur lors de la récupération de l'utilisateur." });
+  }
 };
+
 const addReservation = async (req, res) => {
   const { userId, date, time, numberOfGuests, specialRequests, userEmail } = req.body;
 

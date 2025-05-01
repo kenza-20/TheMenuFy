@@ -7,6 +7,7 @@ const app = express();
 const port = 3000;
 
 const chatRoute = require("./routes/chat");
+const notificationRoutes = require('./routes/notificationRoute');
 
 const superAdminRoute = require('./routes/superAdminRoutes');
 const userRoutes = require('./routes/user');
@@ -30,7 +31,7 @@ app.use(cors({
 })); // Enable CORS for frontend requests
 app.use(express.json());
 
-
+app.use('/api/notifications', notificationRoutes);
 app.use('/api/user', userRoutes); 
 app.use('/api/email', emailRoutes); 
 app.use("/superAdmin",superAdminRoute)
