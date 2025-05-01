@@ -37,13 +37,16 @@ export default function ChatBot() {
   };
 
   return (
-    <div className="fixed bottom-4 right-4 bg-white border shadow-lg rounded-xl w-80 z-50">
-      <div className="p-3 border-b font-bold text-center bg-gray-100 rounded-t-xl">MenuBot 🤖</div>
-      <div className="h-64 overflow-y-auto p-3 space-y-2">
+    <div className="fixed bottom-4 right-4 bg-white border shadow-lg rounded-xl w-[400px] h-[550px] z-50 flex flex-col">
+      <div className="p-4 border-b font-bold text-center bg-gray-100 rounded-t-xl text-lg">
+        MenuBot 🤖
+      </div>
+
+      <div className="flex-1 overflow-y-auto p-4 space-y-2 text-base">
         {messages.map((msg, index) => (
           <div
             key={index}
-            className={`text-sm p-2 rounded-md whitespace-pre-wrap ${
+            className={`p-3 rounded-md whitespace-pre-wrap ${
               msg.sender === 'bot'
                 ? 'bg-gray-200 text-left'
                 : 'bg-blue-100 text-right'
@@ -53,21 +56,22 @@ export default function ChatBot() {
           </div>
         ))}
         {loading && (
-          <div className="text-sm text-gray-500 italic">MenuBot réfléchit...</div>
+          <div className="text-gray-500 italic">MenuBot réfléchit...</div>
         )}
       </div>
-      <div className="flex border-t p-2">
+
+      <div className="flex border-t p-3">
         <input
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleSend()}
-          className="flex-1 text-sm p-1 border rounded"
+          className="flex-1 p-2 border rounded text-base"
           placeholder="Pose ta question..."
         />
         <button
           onClick={handleSend}
-          className="ml-2 px-2 bg-blue-500 text-white rounded disabled:opacity-50"
+          className="ml-2 px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50"
           disabled={loading}
         >
           Envoyer

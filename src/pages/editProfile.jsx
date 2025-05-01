@@ -31,7 +31,7 @@ const EditProfile = () => {
       reader.onloadend = () => {
         setUser((prevUser) => ({
           ...prevUser,
-          profilePic: reader.result,
+          image: reader.result,
         }));
       };
       reader.readAsDataURL(file);
@@ -58,6 +58,7 @@ const EditProfile = () => {
         foodLikes: user.foodLikes,
         foodHates: user.foodHates,
         allergies: formattedAllergies,
+        image:user.image,
       };
   
       const res = await fetch("http://localhost:3000/api/user/update-profile", {
@@ -99,7 +100,7 @@ const EditProfile = () => {
                 </div>
                 <div className="relative w-40 h-40 rounded-full overflow-hidden border-4 border-yellow-500 mx-auto mb-4">
                   <img
-                      src={user?.profilePic || "/default-profile.jpg"}
+                      src={user?.image || "/default-profile.jpg"}
                       alt="Profile"
                       className="w-full h-full object-cover"
                   />
