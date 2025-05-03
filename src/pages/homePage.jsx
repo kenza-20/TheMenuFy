@@ -127,41 +127,40 @@ const HomePage = () => {
     
       {/* Filter Buttons */}
       <section className="py-10 bg-black/70 text-center">
-  <h2 className="text-4xl font-bold text-yellow-400 mb-6">Filtrer les plats</h2>
-  <div className="flex flex-wrap justify-center gap-4">
-    <button
-      onClick={() => fetchFilteredDishes('low-budget')}
-      className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-full"
-    >
-      Low Budget
-    </button>
-    <button
-      onClick={() => fetchFilteredDishes('fast')}
-      className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-full"
-    >
-      Quick Meals
-    </button>
-    <button
-      onClick={() => fetchFilteredDishes(null, 'solo')}
-      className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full"
-    >
-      Repas en Solo
-    </button>
-    <button
-      onClick={() => fetchFilteredDishes(null, 'shared')}
-      className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-full"
-    >
-      Repas à Partager
-    </button>
-    <button
-      onClick={() => setFilteredDishes([])}
-      className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-full"
-    >
-      Réinitialiser
-    </button>
-  </div>
-</section>
-
+        <h2 className="text-4xl font-bold text-yellow-400 mb-6">Filtrer les plats</h2>
+        <div className="flex flex-wrap justify-center gap-4">
+          <button
+            onClick={() => fetchFilteredDishes('low-budget')}
+            className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-full"
+          >
+            Low Budget
+          </button>
+          <button
+            onClick={() => fetchFilteredDishes('fast')}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-full"
+          >
+            Quick Meals
+          </button>
+          <button
+            onClick={() => fetchFilteredDishes(null, 'solo')}
+            className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full"
+          >
+            Repas en Solo
+          </button>
+          <button
+            onClick={() => fetchFilteredDishes(null, 'shared')}
+            className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-full"
+          >
+            Repas à Partager
+          </button>
+          <button
+            onClick={() => setFilteredDishes([])}
+            className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-full"
+          >
+            Réinitialiser
+          </button>
+        </div>
+      </section>
 
       {/* Filtered Results */}
       {filteredDishes.length > 0 && (
