@@ -10,8 +10,13 @@ const {
   validateSalesIncrement 
 } = require('../middleware/validateDish');
 
-const dishController = require('../controlleurs/dishController'); // Fixed typo in the import
+const dishController = require('../controlleurs/dishController'); // ✅ bon dossier + bon nom
 const router = express.Router();
+
+// ✅ CORRIGÉ : mettre avant les routes dynamiques
+router.get('/filter', dishController.filterDishes);
+router.get('/recommended/:userId', dishController.getRecommendedDishes);
+router.get('/recommendations/like', dishController.handleGetSimilarDishes);
 
 // Fetch top-selling dishes
 router.get('/top-sellers', async (req, res) => {
@@ -25,32 +30,32 @@ router.get('/top-sellers', async (req, res) => {
 
 // Fetch similar dishes (add validation for category parameter)
 router.get('/:category/similar', async (req, res) => {
-  const { category } = req.params;  // Get the category from the URL parameter
+  const { category } = req.params;
   try {
     const similarDishes = await dishController.getSimilarDishes(category);
-    res.status(200).json(similarDishes);  // Send the similar dishes to the frontend
+    res.status(200).json(similarDishes);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch similar dishes' });
   }
 });
 
-// Fetch a specific dish by ID (added route for fetching a single dish by dishId)
+// Fetch a specific dish by ID
 router.get('/:dishId', async (req, res) => {
-  const { dishId } = req.params; // Get dishId from the URL parameter
+  const { dishId } = req.params;
   try {
-    const dish = await dishController.getDishById(dishId); // Ensure this method is implemented in your controller
+    const dish = await dishController.getDishById(dishId);
     if (!dish) {
       return res.status(404).json({ error: 'Dish not found' });
     }
-    res.status(200).json(dish); // Send the dish data to the frontend
+    res.status(200).json(dish);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch dish' });
   }
 });
 
-// Increment sales count (add validation for dishId parameter)
+// Increment sales count
 router.post('/:dishId/increment-sales', validateSalesIncrement, async (req, res) => {
-  const { dishId } = req.params; // Extract dishId from the URL
+  const { dishId } = req.params;
   try {
     await dishController.incrementSalesCount(dishId);
     res.status(200).json({ message: 'Sales count incremented successfully' });
@@ -59,9 +64,9 @@ router.post('/:dishId/increment-sales', validateSalesIncrement, async (req, res)
   }
 });
 
-// Mark dish as top seller (validate before marking as top seller)
+// Mark dish as top seller
 router.post('/:dishId/mark-top-seller', validateDishUpdate, async (req, res) => {
-  const { dishId } = req.params; // Extract dishId from the URL
+  const { dishId } = req.params;
   try {
     await dishController.markTopSeller(dishId);
     res.status(200).json({ message: 'Dish marked as top seller' });
@@ -70,9 +75,9 @@ router.post('/:dishId/mark-top-seller', validateDishUpdate, async (req, res) => 
   }
 });
 
-// Add a similar dish (validate before adding similar dish)
+// Add a similar dish
 router.post('/:dishId/add-similar/:similarDishId', validateSimilarDish, async (req, res) => {
-  const { dishId, similarDishId } = req.params; // Extract dishId and similarDishId from the URL
+  const { dishId, similarDishId } = req.params;
   try {
     await dishController.addSimilarDish(dishId, similarDishId);
     res.status(200).json({ message: 'Similar dish added successfully' });
@@ -89,8 +94,5 @@ router.post('/add', validateDishCreation, async (req, res) => {
     res.status(500).json({ error: 'Failed to add dish' });
   }
 });
-
-router.get('/recommended/:userId', dishController.getRecommendedDishes);
-
 
 module.exports = router;

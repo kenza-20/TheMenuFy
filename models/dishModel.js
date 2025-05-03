@@ -13,6 +13,13 @@ const dishSchema = new Schema({
   isTopSeller: { type: Boolean, default: false }, // flag to mark top sellers
   similarDishes: [{ type: Schema.Types.ObjectId, ref: 'Dish' }], // Reference to similar dishes
   salesCount: { type: Number, default: 0 }, // Track how many times the dish has been sold
+
+  // 👇 AJOUT ICI
+  servingMode: {
+    type: String,
+    enum: ['solo', 'shared'],
+    default: 'solo'
+  }
 });
 
 module.exports = mongoose.model('Dish', dishSchema);

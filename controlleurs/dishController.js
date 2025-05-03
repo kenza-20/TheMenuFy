@@ -158,6 +158,57 @@ const getChallengeDish = async () => {
     throw error;
   }
 };
+// ✅ Contrôleur HTTP pour récupérer des plats similaires via une requête GET
+const handleGetSimilarDishes = async (req, res) => {
+  const { category } = req.query;
+
+  console.log("➡️ Requête reçue pour catégorie :", category); // ← LOG ICI
+
+  try {
+    const similarDishes = await getSimilarDishes(category);
+    
+    console.log("✅ Plats similaires trouvés :", similarDishes); // ← LOG ICI
+
+    res.status(200).json(similarDishes);
+  } catch (error) {
+    console.error("❌ Erreur dans handleGetSimilarDishes :", error); // ← LOG ERREUR
+    res.status(500).json({ message: "Erreur lors de la récupération des plats similaires", error: error.message });
+  }
+};
+
+const filterDishes = async (req, res) => {
+  const { type, mode } = req.query;
+
+  try {
+    let filter = {};
+
+    // Filtrage par budget
+    if (type === 'low-budget') {
+      filter.price = { $lte: 10 };
+    } else if (type === 'fast') {
+      filter.preparationTime = { $lte: 15 };
+    }
+
+    // ✅ Nouveau : filtrage par mode de service
+    if (mode === 'solo' || mode === 'shared') {
+      filter.mode = mode;
+    }
+
+    console.log("🧩 Requête de filtrage :", req.query);
+    console.log("🔍 Filtres MongoDB appliqués :", filter);
+
+    const dishes = await Dish.find(filter);
+    res.status(200).json(dishes);
+  } catch (error) {
+    console.error("❌ Erreur lors du filtrage :", error);
+    res.status(500).json({ message: "Erreur serveur", error: error.message });
+  }
+};
+
+
+
+
+
 
 module.exports = {
   markTopSeller,
@@ -167,5 +218,8 @@ module.exports = {
   incrementSalesCount,
   addDish,
   getChallengeDish,
-  getRecommendedDishes, // ✅ ajoute ceci
+  getRecommendedDishes,
+  handleGetSimilarDishes,
+  filterDishes,
+
 };
