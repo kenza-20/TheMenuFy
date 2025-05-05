@@ -443,42 +443,24 @@ const getFriendsRecommendations = async (req, res) => {
     const { userId } = req.params;
     console.log("➡️ Requête reçue pour l'utilisateur ID:", userId);
 
-    const user = await User.findById(userId).populate('friends');
+    const user = await User.findById(userId); // ❗️Pas de populate ici
     if (!user) {
-      console.log("❌ Utilisateur introuvable avec l'ID:", userId);
       return res.status(404).json({ message: "Utilisateur introuvable." });
     }
 
-    console.log("✅ Utilisateur trouvé:", user.name);
-    console.log("👥 Données brutes des amis (user.friends):", user.friends);
-
-    // Récupérer un tableau d'IDs sous forme de String
-    const friendsArray = Array.isArray(user.friends) ? user.friends : [];
-    const friendsIds = friendsArray.map(friend => {
-      const id = friend._id ? friend._id.toString() : friend.toString();
-      console.log("➡️ ID ami extrait:", id);
-      return id;
-    });
-
+    const friendsIds = Array.isArray(user.friends) ? user.friends : [];
     console.log("📋 Liste des IDs d'amis:", friendsIds);
 
     if (friendsIds.length === 0) {
-      console.log("ℹ️ Aucun ami trouvé, on retourne une liste vide.");
       return res.status(200).json([]);
     }
 
-    // **IMPORTANT** : Forcer la conversion des IDs en String pour la comparaison
     const orders = await Order.find({
-      id_user: { $in: friendsIds.map(id => new mongoose.Types.ObjectId(id)) }
+      id_user: { $in: friendsIds } // 🔥 fonctionne car id_user est un string aussi
     });
-    console.log("🧾 Commandes récupérées pour les amis:", orders.length);
-    if (orders.length === 0) {
-      console.log("⚠️ Aucun plat commandé par les amis.");
-    }
 
     const recommendationsMap = new Map();
     for (const order of orders) {
-      console.log("🍽️ Analyse commande:", order.name);
       if (!recommendationsMap.has(order.id_dish)) {
         recommendationsMap.set(order.id_dish, {
           id_dish: order.id_dish,
@@ -493,15 +475,14 @@ const getFriendsRecommendations = async (req, res) => {
     }
 
     const recommendations = Array.from(recommendationsMap.values()).sort((a, b) => b.count - a.count);
-    console.log("✅ Recommandations finales:", recommendations);
-    
     res.status(200).json(recommendations);
 
   } catch (error) {
-    console.error("🛑 Erreur dans getFriendsRecommendations:", error);
+    console.error("🛑 Erreur:", error);
     res.status(500).json({ message: "Erreur serveur" });
   }
 };
+
 
 
 
