@@ -6,7 +6,7 @@ exports.addOrder = async (req, res) => {
   try {
     const order = new Order({
       ...req.body,
-      quantity: 1
+      quantity: 1,
     });
     await order.save();
     res.status(201).json(order);

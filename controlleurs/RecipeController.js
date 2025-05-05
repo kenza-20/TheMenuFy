@@ -61,6 +61,24 @@ const { price_id } = req.params;
   }
 };
 
+exports.getRecipeByName = async (req, res) => {
+  const { name } = req.params;
+
+  try {
+    const recipe = await Recipe.findOne({ name: name });
+    
+    if (!recipe) {
+      return res.status(404).json({ message: "Recipe not found" });
+    }
+
+    res.status(200).json(recipe);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error fetching recipe by name", error: error.message });
+  }
+};
+
+
 // Update a recipe
 // exports.updateRecipe = async (req, res) => {
 //   const { id } = req.params;
