@@ -35,6 +35,7 @@ interface Order {
 }
 
 const OrderHistory = () => {
+  const [lastOrder, setLastOrder] = useState<Order | null>(null)
   const [orders, setOrders] = useState<Order[]>([])
   const [filteredOrders, setFilteredOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
@@ -94,10 +95,47 @@ const OrderHistory = () => {
 
     if (id_user) {
       fetchOrders()
+      fetchLastOrder() // <--- ajoute cette ligne ici
     } else {
       navigate("/login")
     }
   }, [id_user, navigate])
+
+
+  const fetchLastOrder = async () => {
+    try {
+      const res = await axios.get(`http://localhost:3000/api/user/last-order/${id_user}`)
+      const order = res.data
+      const orderDate = new Date(order.createdAt)
+  
+      setLastOrder({
+        id: order._id,
+        date: orderDate.toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        }),
+        time: orderDate.toLocaleTimeString("en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+        rawDate: orderDate,
+        items: order.items.map((item: any) => ({
+          name: item.name,
+          quantity: item.quantity,
+          price: item.price,
+          subtotal: item.price * item.quantity,
+          image: item.image,
+        })),
+        total: order.total
+      })
+    } catch (err) {
+      console.error("⚠️ Erreur fetch last order:", err)
+    }
+  }
+  
+
+
 
   useEffect(() => {
     if (dateFilter) {
@@ -312,6 +350,26 @@ const OrderHistory = () => {
         <div className="w-full max-w-7xl pt-15">
           <BlurContainer blur="xl" opacity={50} padding={8} rounded="2xl" className="w-full mx-auto p-6">
             <div className="flex flex-col space-y-10">
+
+
+            {lastOrder && (
+  <div className="bg-yellow-500/10 text-white p-5 rounded-xl shadow mb-6">
+    <h3 className="text-lg font-bold mb-2">🕓 Your Last Order</h3>
+    <div className="flex flex-wrap justify-between items-center">
+      <div>
+        <p className="text-sm">Placed on: <span className="font-medium">{lastOrder.date} at {lastOrder.time}</span></p>
+        <p className="text-sm">Items: <span className="font-medium">{lastOrder.items.length}</span></p>
+      </div>
+      <div>
+        <p className="text-sm font-semibold text-yellow-400">Total: ${lastOrder.total.toFixed(2)}</p>
+      </div>
+    </div>
+  </div>
+)}
+
+
+
+
               {/* Header Section with Search and Download Options */}
               <div className="flex flex-col md:flex-row justify-between items-center gap-6">
                 <motion.div

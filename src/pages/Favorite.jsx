@@ -27,6 +27,8 @@ const Favorites = () => {
         navigate(`/dish/${item.id}`, { state: { item } });
     };
 
+    
+
     return (
         <div className="flex flex-col min-h-screen">
             <div

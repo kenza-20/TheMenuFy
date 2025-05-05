@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
+
+
 const testimonials = [
   {
     name: "Sarah Johnson",
@@ -18,6 +21,25 @@ const testimonials = [
     comment: "Creative dishes with perfect flavor balance. Will definitely return!",
   },
 ];
+
+
+const defaultOrderItem = {
+  name: "",
+  quantity: 0,
+  price: 0,
+  subtotal: 0,
+  image: "",
+};
+
+const defaultOrder = {
+  id: "",
+  date: "",
+  time: "",
+  rawDate: new Date(),
+  items: [],
+  total: 0,
+};
+
 const HomePage = () => {
   const [recommendedDishes, setRecommendedDishes] = useState([]);
   const [similarDishes, setSimilarDishes] = useState([]);
@@ -25,6 +47,10 @@ const HomePage = () => {
   const [user, setUser] = useState(null);
   const [popularDishes, setPopularDishes] = useState([]);
   const [friendsRecommendations, setFriendsRecommendations] = useState([]);
+  const [lastOrder, setLastOrder] = useState(null); // ✅
+  const navigate = useNavigate();
+  const [promoFavorites, setPromoFavorites] = useState([]);
+  const [behavioralRecommendations, setBehavioralRecommendations] = useState([]);
 
   // Recommandations d'amis
 
@@ -130,6 +156,84 @@ useEffect(() => {
 
   fetchUserAndDishes(); // 👈 on exécute notre fonction
 }, []);
+
+
+useEffect(() => {
+  const fetchBehavioralRecommendations = async () => {
+    try {
+      const user = JSON.parse(localStorage.getItem("user"));
+      const userId = user?._id || user?.id;
+
+      if (!userId) return;
+
+      const res = await axios.get(`http://localhost:3000/api/user/behavioral-recommendations/${userId}`);
+      console.log("🧠 Recommandations comportementales :", res.data);
+      setBehavioralRecommendations(res.data);
+    } catch (err) {
+      console.error("❌ Erreur recommandations comportementales :", err);
+    }
+  };
+
+  fetchBehavioralRecommendations();
+}, []);
+
+
+
+
+
+useEffect(() => {
+  const fetchPromoFavorites = async () => {
+    try {
+      const user = JSON.parse(localStorage.getItem("user"));
+      const userId = user?._id || user?.id;
+
+      if (!userId) return;
+
+      const res = await axios.get(`http://localhost:3000/api/user/favorites/promotions/${userId}`);
+      console.log("🎯 Favoris en promotion :", res.data);
+      setPromoFavorites(res.data);
+    } catch (err) {
+      console.error("❌ Erreur favoris en promo :", err);
+    }
+  };
+
+  fetchPromoFavorites();
+}, []);
+
+
+
+useEffect(() => {
+  const fetchLastOrder = async () => {
+    try {
+      const user = JSON.parse(localStorage.getItem("user"));
+      const userId = user?._id || user?.id;
+
+      if (!userId) {
+        console.warn("❌ Aucun ID utilisateur disponible.");
+        return;
+      }
+
+      console.log("🔁 Fetching last order for user:", userId);
+
+      const res = await axios.get(`http://localhost:3000/api/user/last-order/${userId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      console.log("🧾 Dernière commande reçue :", res.data);
+      setLastOrder(res.data);
+    } catch (err) {
+      console.error("❌ Erreur lors de la récupération de la dernière commande :", err);
+    }
+  };
+
+  fetchLastOrder();
+}, []);
+
+
+
+
 
 
   useEffect(() => {
@@ -308,7 +412,74 @@ useEffect(() => {
       )}
 
 
+{lastOrder && (
+  <section className="bg-white/10 backdrop-blur-md p-6 rounded-xl shadow-xl text-white mb-8 mx-4">
+    <h2 className="text-xl font-bold mb-3">🍽️ Reprenez votre dernière commande</h2>
+    <ul className="mb-3">
+      {lastOrder.items.map((item, idx) => (
+        <li key={idx} className="flex justify-between text-sm">
+          <span>{item.name} x {item.quantity}</span>
+          <span>${(item.price * item.quantity).toFixed(2)}</span>
+        </li>
+      ))}
+    </ul>
+    <div className="flex justify-between items-center">
+      <span className="font-semibold text-lg text-yellow-400">Total : ${lastOrder.total.toFixed(2)}</span>
+      <button
+        onClick={() => navigate("/resto/2/menu")}
+        className="bg-yellow-400 text-black px-4 py-2 rounded-full hover:bg-yellow-500 transition"
+      >
+        Commander à nouveau
+      </button>
+    </div>
+  </section>
+)}
 
+
+{behavioralRecommendations.length > 0 && (
+  <section className="py-20 bg-black/70">
+    <div className="container mx-auto px-6">
+      <h2 className="text-4xl font-bold text-center mb-12 text-yellow-400">
+        🔁 Vos plats préférés (basé sur vos commandes)
+      </h2>
+      <div className="grid md:grid-cols-3 gap-8">
+        {behavioralRecommendations.map((dish) => (
+          <div key={dish._id} className="bg-white/10 p-5 rounded-xl text-white shadow-md">
+            <img src={dish.image} alt={dish.name} className="w-full h-40 object-cover rounded" />
+            <h3 className="text-xl font-semibold mt-3">{dish.name}</h3>
+            <p className="text-sm text-gray-300 mb-2">{dish.description}</p>
+            <span className="text-yellow-400 font-bold">{dish.price} TND</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+)}
+
+
+
+{promoFavorites.length > 0 && (
+  <section className="py-16 bg-black/70">
+    <div className="container mx-auto px-6">
+      <h2 className="text-4xl font-bold text-center text-yellow-400 mb-10">
+        🎁 Vos plats favoris en promotion
+      </h2>
+      <div className="grid md:grid-cols-3 gap-8">
+        {promoFavorites.map((dish) => (
+          <div key={dish._id} className="bg-white/10 p-5 rounded-xl text-white shadow-md">
+            <img src={dish.image} alt={dish.name} className="w-full h-40 object-cover rounded" />
+            <h3 className="text-xl font-semibold mt-3">{dish.name}</h3>
+            <p className="text-sm text-gray-300 mb-2">{dish.description}</p>
+            <div className="flex justify-between items-center mt-3">
+              <span className="text-yellow-400 font-bold">{dish.price} TND</span>
+              <span className="text-green-400 text-sm font-semibold">-{dish.promotion}%</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+)}
 
 
 {seasonalDishes.length > 0 && (

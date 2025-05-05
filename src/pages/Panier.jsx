@@ -45,7 +45,6 @@ const Panier = () => {
         console.error('Failed to fetch meals:', error);
       });
   }, []);
-
   const removeMeal = async (name , id) => {
     // Show the confirmation alert before proceeding with the deletion
     const result = await Swal.fire({
@@ -117,6 +116,7 @@ const Panier = () => {
       const selectedMeals = meals
         .filter(meal => quantities[meal.id] > 0)
         .map(meal => ({
+          dishId: meal._id, // ✅ AJOUT ICI
           price_id:meal.id,
           description:meal.description,
           image:meal.image,
@@ -129,6 +129,13 @@ const Panier = () => {
       const total = selectedMeals.reduce((acc, item) => acc + parseFloat(item.subtotal), 0).toFixed(2);
 
       localStorage.setItem("invoiceData", JSON.stringify({ selectedMeals, total }));
+
+      await axios.post("http://localhost:3000/api/placedOrders/create", {
+        userId: id_user,
+        items: selectedMeals,
+        total: total
+      });
+      
 
       const line_items = selectedMeals.map(meal => ({
         price: meals.find(m => m.name === meal.name).id,

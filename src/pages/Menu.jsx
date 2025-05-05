@@ -184,26 +184,31 @@ const Menu = () => {
       console.error('Error adding order:', error);
     }
   };
-
+  
   const addToFavorites = (item) => {
     const existingFavorites = JSON.parse(localStorage.getItem('favorites')) || [];
-
-    if (existingFavorites.some(fav => fav.id === item.id)) {
-      setPopupMessage(`${item.name} is already in favorites!`);
+  
+    const alreadyFavorite = existingFavorites.some(fav => fav._id === item._id);
+    if (alreadyFavorite) {
+      setPopupMessage(`❗ ${item.name} est déjà dans vos favoris`);
       setShowPopup(true);
       setTimeout(() => setShowPopup(false), 3000);
       return;
     }
-
+  
     const updatedFavorites = [...existingFavorites, item];
     localStorage.setItem('favorites', JSON.stringify(updatedFavorites));
     setFavorites(updatedFavorites);
-
-    setPopupMessage(`Added to favorites: ${item.name}`);
+  
+    setPopupMessage(`❤️ ${item.name} ajouté aux favoris`);
     setShowPopup(true);
     setTimeout(() => setShowPopup(false), 3000);
-    navigate('/favorites');
   };
+  
+  
+  
+  
+  
 
   const handleImageClick = (item) => {
     console.log(item._id,"CLICKED")
