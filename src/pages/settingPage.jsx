@@ -1,109 +1,173 @@
-import React, { useState } from "react";
-import { Sun, Moon, Bell, Globe } from "lucide-react"; // Icônes
-import BlurContainer from "../components/blurContainer"; // Conteneur avec effet blur
-import Button from "../components/button"; // Bouton stylisé
-import Footer from "../components/footer"; // Footer
+import React, { useEffect, useState } from "react";
+import { Sun, Moon } from "lucide-react";
+import BlurContainer from "../components/blurContainer";
+import Button from "../components/button";
+import Footer from "../components/footer";
 
 const Settings = () => {
-  // États pour les préférences
   const [darkMode, setDarkMode] = useState(false);
-  const [notifications, setNotifications] = useState(true);
-  const [language, setLanguage] = useState("English");
+  const [goal, setGoal] = useState("None");
+  const [minCalories, setMinCalories] = useState("");
+  const [maxCalories, setMaxCalories] = useState("");
+  const [showPopup, setShowPopup] = useState(false);
+
+  // Charger les données sauvegardées
+  useEffect(() => {
+    const saved = localStorage.getItem("userSettings");
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      setDarkMode(parsed.darkMode || false);
+      setGoal(parsed.goal || "None");
+      setMinCalories(parsed.minCalories || "");
+      setMaxCalories(parsed.maxCalories || "");
+    }
+  }, []);
+
+  // Sauvegarder les paramètres
+  const saveSettings = () => {
+    const settings = {
+      darkMode,
+      goal,
+      minCalories,
+      maxCalories,
+    };
+    localStorage.setItem("userSettings", JSON.stringify(settings));
+    alert("Paramètres enregistrés !");
+  };
+
+  // Lors du changement d'objectif santé
+  const handleGoalChange = (value) => {
+    setGoal(value);
+    if (value !== "None") {
+      setShowPopup(true);
+    }
+  };
+
+  // Validation du popup
+  const handlePopupConfirm = () => {
+    const settings = {
+      darkMode,
+      goal,
+      minCalories,
+      maxCalories,
+    };
+    localStorage.setItem("userSettings", JSON.stringify(settings));
+    setShowPopup(false);
+    alert("Objectif santé et calories enregistrés !");
+  };
 
   return (
-    <div className="flex flex-col min-h-screen">
-      {/* Background Image */}
-      <div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat -z-10"
-        style={{
-          backgroundImage: "url('/Profile.jpg')",
-          boxShadow: "inset 0 0 0 2000px rgba(0, 0, 0, 0.3)",
-        }}
-      />
+      <div className="flex flex-col min-h-screen">
+        {/* Background */}
+        <div
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat -z-10"
+            style={{
+              backgroundImage: "url('/Profile.jpg')",
+              boxShadow: "inset 0 0 0 2000px rgba(0, 0, 0, 0.3)",
+            }}
+        />
 
-      {/* Main Content */}
-      <main className="flex-grow flex items-center justify-center py-12 px-6">
-        <BlurContainer className="w-[450px] p-8 rounded-2xl bg-white/10 backdrop-blur-xl text-white">
-          <h1 className="text-3xl font-bold text-center mb-6">Settings</h1>
+        {/* Main Content */}
+        <main className="flex-grow flex items-center justify-center py-12 px-6">
+          <BlurContainer className="w-[450px] p-8 rounded-2xl bg-white/10 backdrop-blur-xl text-white">
+            <h1 className="text-3xl font-bold text-center mb-6">Settings</h1>
 
-          <div className="space-y-6">
-            {/* Dark Mode Toggle */}
-            <div className="flex items-center justify-between bg-white/10 p-4 rounded-lg">
-              <div className="flex items-center space-x-3">
-                {darkMode ? (
-                  <Moon className="text-yellow-500" size={22} />
-                ) : (
-                  <Sun className="text-yellow-500" size={22} />
-                )}
-                <span className="text-white">Dark Mode</span>
+            <div className="space-y-6">
+              {/* Dark Mode Toggle */}
+              <div className="flex items-center justify-between bg-white/10 p-4 rounded-lg">
+                <div className="flex items-center space-x-3">
+                  {darkMode ? (
+                      <Moon className="text-yellow-500" size={22} />
+                  ) : (
+                      <Sun className="text-yellow-500" size={22} />
+                  )}
+                  <span className="text-white">Dark Mode</span>
+                </div>
+                <button
+                    onClick={() => setDarkMode(!darkMode)}
+                    className={`w-12 h-6 flex items-center rounded-full p-1 ${
+                        darkMode ? "bg-yellow-500" : "bg-gray-500"
+                    }`}
+                >
+                  <div
+                      className={`w-5 h-5 bg-white rounded-full shadow-md transform ${
+                          darkMode ? "translate-x-6" : "translate-x-0"
+                      } transition`}
+                  />
+                </button>
               </div>
-              <button
-                onClick={() => setDarkMode(!darkMode)}
-                className={`w-12 h-6 flex items-center rounded-full p-1 ${
-                  darkMode ? "bg-yellow-500" : "bg-gray-500"
-                }`}
-              >
-                <div
-                  className={`w-5 h-5 bg-white rounded-full shadow-md transform ${
-                    darkMode ? "translate-x-6" : "translate-x-0"
-                  } transition`}
-                />
-              </button>
-            </div>
 
-            {/* Notifications Toggle */}
-            <div className="flex items-center justify-between bg-white/10 p-4 rounded-lg">
-              <div className="flex items-center space-x-3">
-                <Bell className="text-yellow-500" size={22} />
-                <span className="text-white">Notifications</span>
+              {/* Health Goal Selection */}
+              <div className="flex items-center justify-between bg-white/10 p-4 rounded-lg">
+                <div className="flex items-center space-x-3">
+                  <span className="text-white font-medium">Objectif santé</span>
+                </div>
+                <select
+                    value={goal}
+                    onChange={(e) => handleGoalChange(e.target.value)}
+                    className="bg-transparent text-white border border-gray-300 rounded-md px-2 py-1 focus:outline-none"
+                >
+                  <option className="text-black" value="None">Aucun</option>
+                  <option className="text-black" value="Perte de poids">Perte de poids</option>
+                  <option className="text-black" value="Prise de masse">Prise de masse</option>
+                  <option className="text-black" value="Maintien de forme">Maintien de forme</option>
+                </select>
               </div>
-              <button
-                onClick={() => setNotifications(!notifications)}
-                className={`w-12 h-6 flex items-center rounded-full p-1 ${
-                  notifications ? "bg-yellow-500" : "bg-gray-500"
-                }`}
-              >
-                <div
-                  className={`w-5 h-5 bg-white rounded-full shadow-md transform ${
-                    notifications ? "translate-x-6" : "translate-x-0"
-                  } transition`}
-                />
-              </button>
-            </div>
 
-            {/* Language Selection */}
-            <div className="flex items-center justify-between bg-white/10 p-4 rounded-lg">
-              <div className="flex items-center space-x-3">
-                <Globe className="text-yellow-500" size={22} />
-                <span className="text-white">Language</span>
+              {/* Save Button */}
+              <Button
+                  onClick={saveSettings}
+                  className="w-full bg-transparent hover:bg-yellow-500 text-yellow-500 hover:text-white border-2 border-yellow-500 font-semibold py-3 px-6 rounded-full transition-all duration-300"
+              >
+                Save Settings
+              </Button>
+            </div>
+          </BlurContainer>
+        </main>
+
+        {/* Popup pour calories */}
+        {showPopup && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-xl p-6 w-[90%] max-w-md shadow-lg">
+                <h2 className="text-xl font-bold mb-4 text-gray-800">Définir les calories</h2>
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-gray-700 font-medium">Calories min</label>
+                    <input
+                        type="number"
+                        value={minCalories}
+                        onChange={(e) => setMinCalories(e.target.value)}
+                        className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-gray-700 font-medium">Calories max</label>
+                    <input
+                        type="number"
+                        value={maxCalories}
+                        onChange={(e) => setMaxCalories(e.target.value)}
+                        className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none"
+                    />
+                  </div>
+                  <div className="flex justify-end space-x-2 mt-4">
+                    <button
+                        onClick={() => setShowPopup(false)}
+                        className="px-4 py-2 bg-gray-300 rounded-md hover:bg-gray-400 text-gray-800"
+                    >
+                      Annuler
+                    </button>
+                    <button
+                        onClick={handlePopupConfirm}
+                        className="px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600"
+                    >
+                      OK
+                    </button>
+                  </div>
+                </div>
               </div>
-              <select
-                value={language}
-                onChange={(e) => setLanguage(e.target.value)}
-                className="bg-transparent text-white border border-gray-300 rounded-md px-2 py-1 focus:outline-none"
-              >
-                <option className="text-black" value="English">
-                  English
-                </option>
-                <option className="text-black" value="Français">
-                  Français
-                </option>
-                <option className="text-black" value="Español">
-                  Español
-                </option>
-              </select>
             </div>
-
-            {/* Save Button */}
-            <Button className="w-full bg-transparent hover:bg-yellow-500 text-yellow-500 hover:text-white border-2 border-yellow-500 font-semibold py-3 px-6 rounded-full transition-all duration-300">
-              Save Settings
-            </Button>
-          </div>
-        </BlurContainer>
-      </main>
-
-      <Footer />
-    </div>
+        )}
+      </div>
   );
 };
 

@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 
-
 const Menu = () => {
   const [activeCategory, setActiveCategory] = useState('starters');
   const [showPopup, setShowPopup] = useState(false);
@@ -12,146 +11,96 @@ const Menu = () => {
   const [searchLetter, setSearchLetter] = useState('');
   const [favorites, setFavorites] = useState([]);
   const [notifications, setNotifications] = useState([]);
-  const id_user = typeof window !== "undefined" ? localStorage.getItem("userId") : null;
-
-
-  const navigate = useNavigate();
-  const [menuItems, setMenuItems] = useState([])
+  const [goal, setGoal] = useState('None');
+  const [menuItems, setMenuItems] = useState([]);
   const [orders, setOrders] = useState([]);
-  
+
+  const id_user = typeof window !== "undefined" ? localStorage.getItem("userId") : null;
+  const navigate = useNavigate();
+
   useEffect(() => {
-    axios.get(`http://localhost:3000/api/orders/${id_user}`)
-      .then(response => {
-        const transformedMeals = response.data.map(item => ({
-          price_id:item.price_id
-        }));
-        setOrders(transformedMeals)})
-      .catch(error => {
-        console.error('Failed to fetch meals:', error);
-      });
+    // Lire goal depuis userSetting dans le localStorage
+    const settings = JSON.parse(localStorage.getItem("userSettings"));
+    setGoal(settings?.goal || "None");
   }, []);
 
+  useEffect(() => {
+    axios.get(`http://localhost:3000/api/orders/${id_user}`)
+        .then(response => {
+          const transformedMeals = response.data.map(item => ({
+            price_id: item.price_id
+          }));
+          setOrders(transformedMeals);
+        })
+        .catch(error => {
+          console.error('Failed to fetch meals:', error);
+        });
+  }, []);
 
   useEffect(() => {
     axios.get(`http://localhost:3000/api/recipes/all`)
-      .then(response => {
-        console.log("Fetched recipeeeeeeeeeeess:", response.data)
-        setMenuItems(response.data)
-      })
-      .catch(error => {
-        console.error('Failed to fetch meals:', error)
-      })
-  
-}, [])
-
-  // const menuItems = [
-  //   {
-  //     id: 1,
-  //     category: 'starters',
-  //     name: 'Caesar Salad',
-  //     description: 'Romaine lettuce, croutons, parmesan, homemade caesar dressing',
-  //     price: 8.90,
-  //     image: 'https://www.seriouseats.com/thmb/Fi_FEyVa3_-_uzfXh6OdLrzal2M=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/the-best-caesar-salad-recipe-06-40e70f549ba2489db09355abd62f79a9.jpg',
-  //   },
-  //   {
-  //     id: 2,
-  //     category: 'mains',
-  //     name: 'Beef Bourguignon',
-  //     description: 'Beef stewed in red wine, carrots, onions, mushrooms',
-  //     price: 18.50,
-  //     image: 'https://www.seriouseats.com/thmb/_CovX26D-Z6wpeDYJXGhFhA47H8=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/MMPSOUPSANDSTEWS-SEA-BoeufBourguignon-FredHardyII-000-991c38a78f934722954c47567b6be97b.jpg',
-  //   },
-  //   {
-  //     id: 3,
-  //     category: 'desserts',
-  //     name: 'Crème Brûlée',
-  //     description: 'Vanilla cream caramelized to perfection',
-  //     price: 6.90,
-  //     image: 'https://assets.afcdn.com/recipe/20161201/4190_w1024h1024c1cx2705cy1803.webp',
-  //   },
-  //   {
-  //     id: 4,
-  //     category: 'starters',
-  //     name: 'Bruschetta',
-  //     description: 'Grilled bread with tomato, garlic, basil and olive oil',
-  //     price: 7.50,
-  //     image: 'https://www.simplyorganic.com/media/wysiwyg/tmp/simply-oragnic-Roasted-Tomato-Bruschetta-1080x1080-thumbnail.jpg',
-  //   },
-  //   {
-  //     id: 5,
-  //     category: 'starters',
-  //     name: 'French Onion Soup',
-  //     description: 'Caramelized onions, beef broth, cheese-topped crouton',
-  //     price: 9.00,
-  //     image: 'https://www.thespruceeats.com/thmb/BYc5SJFHrCWFCRpTO5Z2IvMtrZs=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/easy-french-onion-soup-3062131-hero-01-2a93bd3c60084db5a8a8e1039c0e0a2f.jpg',
-  //   },
-  //   {
-  //     id: 6,
-  //     category: 'mains',
-  //     name: 'Coq au Vin',
-  //     description: 'Chicken braised with wine, mushrooms, bacon and garlic',
-  //     price: 17.00,
-  //     image: 'https://www.francine.com/wp-content/uploads/2018/09/coq-au-vin-51190848505-1.webp',
-  //   },
-  //   {
-  //     id: 7,
-  //     category: 'mains',
-  //     name: 'Grilled Salmon',
-  //     description: 'Grilled salmon fillet with lemon butter sauce',
-  //     price: 19.50,
-  //     image: 'https://images.getrecipekit.com/20220505193805-grilled-garlic-dijon-salmon_1000x.webp?class=16x9',
-  //   },
-  //   {
-  //     id: 8,
-  //     category: 'desserts',
-  //     name: 'Chocolate Lava Cake',
-  //     description: 'Rich chocolate cake with molten center',
-  //     price: 7.90,
-  //     image: 'https://food.fnr.sndimg.com/content/dam/images/food/fullset/2010/12/28/4/FNM_010111-Copy-That-026_s4x3.jpg.rend.hgtvcom.1280.960.suffix/1382545880780.jpeg',
-  //   },
-  //   {
-  //     id: 9,
-  //     category: 'desserts',
-  //     name: 'Tiramisu',
-  //     description: 'Coffee-flavored Italian dessert with mascarpone',
-  //     price: 8.50,
-  //     image: 'https://biancolievito.it/wp-content/uploads/2023/09/MASCHERA-WORDPRESS-3.webp',
-  //   },
-  // ];
-
-  // Fetch meals from API
-  
-
-
-
-
+        .then(response => {
+          setMenuItems(response.data);
+        })
+        .catch(error => {
+          console.error('Failed to fetch meals:', error);
+        });
+  }, []);
 
   const categories = ['starters', 'mains', 'desserts'];
 
+  const filteredMenuItems = menuItems.filter(item => {
+    const matchesSearch = item.name.toLowerCase().startsWith(searchLetter.toLowerCase());
+    const matchesCategory = item.category === activeCategory;
+    const matchesGoal = !goal || goal === "None" || item.goal === goal;
+    return matchesSearch && matchesCategory && matchesGoal;
+  });
+
   const addToCart = async (item) => {
+    console.log("item",item.ingredients)
+    const user = JSON.parse(localStorage.getItem("user"));
     const userId = localStorage.getItem('userId');
-    if (!userId) {
-      alert("User not logged in");
+
+    if (!userId || !user) {
+      alert("Utilisateur non connecté ou données manquantes.");
       return;
     }
-  
-    console.log("this is the item", item);
-  
-    // Check if the item already exists in the orders based on price_id
-    const isAlreadyInCart = orders.some(order => order.price_id === item.price_id);
-  
-    if (isAlreadyInCart) {
-      // Show SweetAlert if the item is already in the cart
+
+    const userAllergies = Array.isArray(user.allergies)
+        ? user.allergies.map(a => a.toLowerCase().trim())
+        : typeof user.allergies === "string"
+            ? user.allergies.split(",").map(a => a.toLowerCase().trim())
+            : [];
+
+    const recipeAllergens = Array.isArray(item.allergens)
+        ? item.allergens.map(a => a.toLowerCase().trim())
+        : [];
+
+    const allergensInCommon = recipeAllergens.filter(allergen =>
+        userAllergies.includes(allergen)
+    );
+
+    if (allergensInCommon.length > 0) {
       Swal.fire({
         icon: 'warning',
-        title: 'Already in Cart',
-        text: `The item ${item.name} is already in your cart!`,
+        title: '⚠️ Allergènes détectés',
+        html: `Ce plat contient : <strong>${allergensInCommon.join(", ")}</strong>`,
+        confirmButtonText: 'Retour'
+      });
+      return;
+    }
+
+    const isAlreadyInCart = orders.some(order => order.price_id === item.price_id);
+    if (isAlreadyInCart) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Déjà dans le panier',
+        text: `L'article ${item.name} est déjà dans votre panier !`,
         confirmButtonText: 'Ok',
       });
       return;
     }
-  
-    // If not already in cart, add the item to orders
+
     const newOrder = {
       orderedAt: Date.now(),
       id_user: userId,
@@ -161,27 +110,23 @@ const Menu = () => {
       price_id: item.price_id,
       description: item.description,
       image: item.image,
+      ingredients: item.ingredients
+
     };
-  
-    console.log(newOrder, "newOrder");
-  
+
     try {
-      const res = await axios.post("http://localhost:3000/api/orders/add", newOrder);
-      console.log(res, "res orderr");
-  
-      // Optionally update the orders state to reflect the new order
+      await axios.post("http://localhost:3000/api/orders/add", newOrder);
+      console.log('new',newOrder.ingredients)
       setOrders([...orders, newOrder]);
-  
-       Swal.fire({
-             icon: 'success',
-             title: 'Added to Cart!',
-             text: `The item ${item.name} was added to your cart.`,
-             confirmButtonText: 'Ok',
-           }).then(() => {
-            //  navigate('/resto/2/menu'); // redirect only after user clicks 'Ok'
-           });
+
+      Swal.fire({
+        icon: 'success',
+        title: 'Ajouté au panier !',
+        text: `L'article ${item.name} a été ajouté.`,
+        confirmButtonText: 'Ok',
+      });
     } catch (error) {
-      console.error('Error adding order:', error);
+      console.error('Erreur lors de l’ajout au panier:', error);
     }
   };
 
@@ -206,14 +151,8 @@ const Menu = () => {
   };
 
   const handleImageClick = (item) => {
-    console.log(item._id,"CLICKED")
     navigate(`/dish/${item._id}`, { state: { item } });
   };
-
-  const filteredMenuItems = menuItems.filter(item =>
-      item.name.toLowerCase().startsWith(searchLetter.toLowerCase()) &&
-      item.category === activeCategory
-  );
 
   useEffect(() => {
     const notificationListener = () => {
@@ -244,14 +183,13 @@ const Menu = () => {
 
             {/* Categories */}
             <div className="flex justify-center mb-8 space-x-4">
-              {categories.map((category,i) => (
+              {categories.map((category, i) => (
                   <button
                       key={i}
                       onClick={() => setActiveCategory(category)}
-                      className={`px-6 py-2 rounded-full text-sm font-medium ${
-                          activeCategory === category
-                              ? 'bg-yellow-500 text-white'
-                              : 'bg-white/10 text-yellow-400 hover:bg-yellow-400/20'
+                      className={`px-6 py-2 rounded-full text-sm font-medium ${activeCategory === category
+                          ? 'bg-yellow-500 text-white'
+                          : 'bg-white/10 text-yellow-400 hover:bg-yellow-400/20'
                       }`}
                   >
                     {category.charAt(0).toUpperCase() + category.slice(1)}
@@ -273,7 +211,7 @@ const Menu = () => {
             {/* Menu Items */}
             <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredMenuItems.map((item,j) => (
+                {filteredMenuItems.map((item, j) => (
                     <div
                         key={j}
                         className="bg-white/5 rounded-xl p-6 border border-white/10 hover:bg-white/10 transition-colors"
@@ -309,7 +247,7 @@ const Menu = () => {
           </div>
         </main>
 
-        {/* Confirmation Popup */}
+        {/* Popup */}
         {showPopup && (
             <div className="fixed inset-0 flex justify-center items-center z-50">
               <div className="bg-black bg-opacity-50 absolute inset-0"></div>

@@ -100,26 +100,6 @@ const Navbar = ({ authenticated }) => {
             <div className="hidden md:flex items-center space-x-6">
                 {authenticated && (
                     <>
-                        <div className="relative">
-                            <button onClick={toggleNotification} className="w-9 h-9 flex items-center justify-center bg-gray-200 rounded-full hover:ring-2 hover:ring-yellow-500 transition">
-                                <Bell className="text-gray-700" size={20} />
-                            </button>
-                            {notifications > 0 && (
-                                <span className="absolute top-0 right-0 translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-red-600 text-white text-xs rounded-full flex items-center justify-center">
-                                    {notifications}
-                                </span>
-                            )}
-                            {isNotificationOpen && (
-                                <div className="absolute top-10 right-0 mt-2 w-56 bg-white shadow-lg rounded-lg py-2 text-black z-50">
-                                    <div className="px-4 py-2">New notifications:</div>
-                                    <ul className="text-sm">
-                                        <li className="hover:bg-gray-100 px-4 py-2">You have 5 new messages</li>
-                                        <li className="hover:bg-gray-100 px-4 py-2">Your order has been shipped</li>
-                                        <li className="hover:bg-gray-100 px-4 py-2">New promotional offers available</li>
-                                    </ul>
-                                </div>
-                            )}
-                        </div>
 
                         <div className="relative">
                             <button onClick={toggleProfile} className="w-9 h-9 flex items-center justify-center bg-gray-200 rounded-full hover:ring-2 hover:ring-yellow-500 transition">

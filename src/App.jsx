@@ -33,7 +33,8 @@ import BlogTips from './pages/BlogTips';
 import MealCalendar from "./pages/MealCalendar";
 import OrderHistory from "./pages/OrderHistory";
 import ChatBot from './ChatBot';
-import { useState } from "react"; // en haut du fichier
+import { useState } from "react";
+import Dashboard from "./pages/dashboard"; // en haut du fichier
 
 const App = () => {
   const location = useLocation();
@@ -51,7 +52,7 @@ const App = () => {
     "/Register",
     "/ResetPasswordEmail",
     "/code",
-    "/resetpwd"
+    "/resetpwd",
   ];
 
   return (
@@ -97,6 +98,8 @@ const App = () => {
           <Route path="/dish/:id" element={authenticated ? <DishDetail /> : <Navigate to="/" />} />
           <Route path="/favorites" element={authenticated ? <Favorites /> : <Navigate to="/" />} />
           <Route path="/tips" element={<BlogTips />} />
+          <Route path="/dashboard" element={authenticated ? <Dashboard /> : <Navigate to="/" />} />
+
 
           {/* Admin protected routes */}
           <Route
