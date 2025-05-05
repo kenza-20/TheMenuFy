@@ -8,6 +8,10 @@ const mongoose = require('mongoose')
 const nodemailer = require('nodemailer');
 const Reservation = require('../models/reservationModel'); 
 const Order = require('../models/orderModel'); // si pas déjà importé
+const PlacedOrder = require('../models/PlacedOrder');
+const userModel = require('../models/userModel');
+const Dish = require('../models/dishModel'); // ajuste le chemin si nécessaire
+
 // Adjust the path if needed
 require('dotenv').config();
 
@@ -443,21 +447,20 @@ const getFriendsRecommendations = async (req, res) => {
     const { userId } = req.params;
     console.log("➡️ Requête reçue pour l'utilisateur ID:", userId);
 
-    const user = await User.findById(userId); // ❗️Pas de populate ici
+    const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ message: "Utilisateur introuvable." });
     }
 
     const friendsIds = Array.isArray(user.friends) ? user.friends : [];
-    console.log("📋 Liste des IDs d'amis:", friendsIds);
+    console.log("📋 IDs des amis trouvés:", friendsIds);
 
     if (friendsIds.length === 0) {
       return res.status(200).json([]);
     }
 
-    const orders = await Order.find({
-      id_user: { $in: friendsIds } // 🔥 fonctionne car id_user est un string aussi
-    });
+    const orders = await Order.find({ id_user: { $in: friendsIds } });
+    console.log("🍽️ Commandes trouvées pour les amis:", orders);
 
     const recommendationsMap = new Map();
     for (const order of orders) {
@@ -475,10 +478,11 @@ const getFriendsRecommendations = async (req, res) => {
     }
 
     const recommendations = Array.from(recommendationsMap.values()).sort((a, b) => b.count - a.count);
+    console.log("✅ Recommandations générées:", recommendations);
     res.status(200).json(recommendations);
 
   } catch (error) {
-    console.error("🛑 Erreur:", error);
+    console.error("🛑 Erreur serveur:", error);
     res.status(500).json({ message: "Erreur serveur" });
   }
 };
@@ -486,7 +490,148 @@ const getFriendsRecommendations = async (req, res) => {
 
 
 
+const getLastOrder = async (req, res) => {
+  const { userId } = req.params;
 
+  try {
+    const lastOrder = await PlacedOrder.findOne({ userId: userId }) // ✅ bon champ
+    .sort({ createdAt: -1 }) // la plus récente
+      .exec();
 
-module.exports = { signupUser,login_post,logout,forgotPassword,resetPassword,updateMonProfil,addReservation,getReservationsByUser,getByToken , getReservationById,  getFriendsRecommendations // ← ✅ Il manquait celui-là
+    if (!lastOrder) {
+      return res.status(404).json({ message: 'Aucune commande trouvée pour cet utilisateur.' });
+    }
+
+    res.status(200).json(lastOrder);
+  } catch (error) {
+    console.error('❌ Erreur dans getLastOrder:', error);
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
 };
+
+
+
+const getPromoFavorites = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    // Récupérer les favoris de l'utilisateur
+    const user = await userModel.findById(userId);
+    if (!user || !user.favorites) {
+      return res.status(404).json({ message: "Utilisateur ou favoris introuvables" });
+    }
+
+    // Rechercher les plats favoris qui ont une promotion active
+    const promoDishes = await Dish.find({
+      _id: { $in: user.favorites },
+      promotion: { $gt: 0 },
+    });
+
+    res.status(200).json(promoDishes);
+  } catch (err) {
+    console.error("❌ Erreur promo favoris :", err);
+    res.status(500).json({ error: "Erreur serveur" });
+  }
+};
+
+const addToFavorites = async (req, res) => {
+  const { userId, dishId } = req.body;
+
+  try {
+    const user = await User.findById(userId); 
+       if (!user) return res.status(404).json({ message: "Utilisateur introuvable" });
+
+    if (!user.favorites.includes(dishId)) {
+      user.favorites.push(dishId);
+      await user.save();
+    }
+
+    res.status(200).json({ message: "Plat ajouté aux favoris", favorites: user.favorites });
+  } catch (err) {
+    console.error("Erreur addToFavorites:", err);
+    res.status(500).json({ message: "Erreur serveur" });
+  }
+};
+
+const removeFromFavorites = async (req, res) => {
+  const { userId, dishId } = req.body;
+
+  try {
+    const user = await User.findById(userId);
+        if (!user) return res.status(404).json({ message: "Utilisateur introuvable" });
+
+    user.favorites = user.favorites.filter(id => id.toString() !== dishId);
+    await user.save();
+
+    res.status(200).json({ message: "Plat retiré des favoris", favorites: user.favorites });
+  } catch (err) {
+    console.error("Erreur removeFromFavorites:", err);
+    res.status(500).json({ message: "Erreur serveur" });
+  }
+};
+
+
+const getBehavioralRecommendations = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+
+    // ✅ 1. On récupère les commandes dans PlacedOrder
+    const orders = await PlacedOrder.find({ userId });
+
+    const dishCounts = {};
+    console.log("Commandes récupérées :", orders);
+
+    // ✅ 2. On compte les plats les plus commandés
+    orders.forEach(order => {
+      console.log("Commande :", order);
+    
+      order.items.forEach(item => {
+        console.log("Item analysé :", item);
+        const dishId = item.dishId?.toString();
+        if (dishId) {
+          dishCounts[dishId] = (dishCounts[dishId] || 0) + item.quantity;
+        }
+      });
+    });
+    
+    
+
+    // ✅ 3. On trie et récupère les plats complets
+    const sortedDishIds = Object.entries(dishCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([dishId]) => new mongoose.Types.ObjectId(dishId));
+
+      console.log("Plats recommandés (IDs) :", sortedDishIds);
+
+      const recommendedDishes = await Dish.find({ _id: { $in: sortedDishIds } });
+
+    res.json(recommendedDishes);
+  } catch (err) {
+    console.error("❌ Erreur comportementale :", err);
+    res.status(500).json({ error: "Erreur serveur" });
+  }
+};
+
+
+
+
+module.exports = {
+  signupUser,
+  login_post,
+  logout,
+  forgotPassword,
+  resetPassword,
+  updateMonProfil,
+  addReservation,
+  getReservationsByUser,
+  getByToken,
+  getReservationById,
+  getFriendsRecommendations,
+  getLastOrder,
+  addToFavorites,            // ✅ Ajouté
+  removeFromFavorites,       // ✅ Ajouté
+  getPromoFavorites  ,
+  getBehavioralRecommendations,        // ✅ (déjà là, on le garde)
+};
+

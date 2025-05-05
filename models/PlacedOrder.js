@@ -9,7 +9,10 @@ const OrderItemSchema = new mongoose.Schema({
   image: String,
   price_id:String,
   description:String,
-
+  dishId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Dish'
+  }
 }, { _id: false });
 
 const PlacedOrderSchema = new mongoose.Schema({

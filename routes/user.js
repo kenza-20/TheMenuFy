@@ -4,6 +4,7 @@ const upload = require('../middleware/upload');
 const userModel = require('../models/userModel');
 const userController = require('../controlleurs/userController');
 const router = express.Router();
+const { getBehavioralRecommendations } = require("../controlleurs/userController");
 
 router.post('/signup',validateUser, userController.signupUser);
 router.post('/login',validateLogin,userController.login_post);
@@ -63,5 +64,10 @@ router.post('/reservations', userController.addReservation);
 router.get('/reservations/:userId', userController.getReservationsByUser);
 router.get('/reservation/:reservationId', userController.getReservationById);
 router.get('/friends/recommendations/:userId', userController.getFriendsRecommendations);
+router.get('/last-order/:userId', userController.getLastOrder);
+router.get('/favorites/promotions/:userId', userController.getPromoFavorites);
+router.post('/favorites/add', userController.addToFavorites);
+router.post('/favorites/remove', userController.removeFromFavorites);
+router.get("/behavioral-recommendations/:userId", getBehavioralRecommendations);
 
 module.exports = router;
