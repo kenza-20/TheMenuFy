@@ -24,6 +24,10 @@ const HomePage = () => {
   const [filteredDishes, setFilteredDishes] = useState([]);
   const [user, setUser] = useState(null);
   const [popularDishes, setPopularDishes] = useState([]);
+  const [friendsRecommendations, setFriendsRecommendations] = useState([]);
+
+  // Recommandations d'amis
+
 
   const fetchFilteredDishes = async (type, mode) => {
     try {
@@ -42,44 +46,6 @@ const HomePage = () => {
   };
   
 
-  useEffect(() => {
-    const fetchUserAndDishes = async () => {
-      try {
-        let storedUser = JSON.parse(localStorage.getItem("user"));
-        console.log("🧠 Utilisateur depuis localStorage :", storedUser);
-  
-        // Si pas d'utilisateur en cache, on le récupère par token
-        const res = await axios.get("http://localhost:3000/api/user/bytoken", {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        });
-        const freshUser = res.data.user;
-        console.log("✅ Utilisateur récupéré par token :", freshUser);
-        localStorage.setItem("user", JSON.stringify(freshUser));
-        setUser(freshUser); // 🔁 force la mise à jour du state
-        
-  
-        setUser(storedUser);
-  
-        // ID peut être _id (Mongo) ou id (retourné côté frontend parfois)
-        const userId = (storedUser?._id || storedUser?.id)?.toString();
-        console.log("🆔 ID extrait :", userId);
-  
-        if (userId && userId.length > 10) {
-          const dishRes = await axios.get(`http://localhost:3000/api/dish/recommended/${userId}`);
-          console.log("🍽️ Dishes recommandés reçus :", dishRes.data);
-          setRecommendedDishes(dishRes.data);
-        } else {
-          console.warn("⚠️ Aucun ID utilisateur valide trouvé !");
-        }
-      } catch (err) {
-        console.error("❌ Erreur de récupération des données :", err);
-      }
-    };
-  
-    fetchUserAndDishes();
-  }, []);
   
   
   
@@ -127,6 +93,43 @@ useEffect(() => {
   fetchPopularDishes();
 }, [user]); // 🔁 Dépend maintenant de l'état `user` et attend sa mise à jour
 
+useEffect(() => {
+  const fetchUserAndDishes = async () => {
+    try {
+      let storedUser = JSON.parse(localStorage.getItem("user"));
+      console.log("🧠 Utilisateur depuis localStorage :", storedUser);
+
+      const res = await axios.get("http://localhost:3000/api/user/bytoken", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      const freshUser = res.data.user;
+      console.log("✅ Utilisateur récupéré par token :", freshUser);
+      localStorage.setItem("user", JSON.stringify(freshUser));
+      setUser(freshUser);
+
+      const userId = (freshUser?._id || freshUser?.id)?.toString();
+      console.log("🆔 ID extrait :", userId);
+
+      if (userId && userId.length > 10) {
+        const dishRes = await axios.get(`http://localhost:3000/api/dish/recommended/${userId}`);
+        console.log("🍽️ Dishes recommandés reçus :", dishRes.data);
+        setRecommendedDishes(dishRes.data);
+
+        // ✅ Appel aux plats des amis ici
+        const friendRes = await axios.get(`http://localhost:3000/api/user/friends/recommendations/${userId}`);
+        console.log("👫 Recommandations des amis :", friendRes.data);
+        setFriendsRecommendations(friendRes.data);
+      }
+    } catch (err) {
+      console.error("❌ Erreur de récupération des données :", err);
+    }
+  };
+
+  fetchUserAndDishes(); // 👈 on exécute notre fonction
+}, []);
 
 
   useEffect(() => {
@@ -168,6 +171,10 @@ useEffect(() => {
         </div>
       </section>
 
+
+
+
+
       {/* Recommended Dishes */}
       <section className="py-20 bg-[url('/bg.jpg')] bg-cover">
         <div className="container mx-auto px-6">
@@ -202,6 +209,25 @@ useEffect(() => {
         </div>
       </section>
 
+      {friendsRecommendations.length > 0 && (
+  <section className="py-20 bg-black/75">
+    <div className="container mx-auto px-6">
+      <h2 className="text-4xl font-bold text-center mb-10 text-yellow-400">
+        🍽️ Plats appréciés par vos amis
+      </h2>
+      <div className="grid md:grid-cols-3 gap-8">
+        {friendsRecommendations.map((dish, idx) => (
+          <div key={idx} className="bg-white/10 p-4 rounded-xl text-white shadow-md">
+            <img src={dish.image} alt={dish.name} className="w-full h-40 object-cover rounded" />
+            <h3 className="text-xl font-semibold mt-2">{dish.name}</h3>
+            <p className="text-sm text-gray-300 mb-2">{dish.description}</p>
+            <p className="text-yellow-400 font-bold text-sm">Commandé {dish.count} fois</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+)}
     
       {popularDishes.length > 0 && (
   <section className="py-16 bg-black/80">
