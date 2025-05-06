@@ -113,7 +113,7 @@ function Login() {
         }}
       />
 
-      <main className="relative flex-grow flex items-center justify-center py-6 px-4 sm:px-6 lg:px-20">
+      <main className=" relative flex-grow flex items-center justify-center py-6 px-4 sm:px-6 lg:px-20">
         <div className="w-full max-w-md sm:w-[480px] sm:h-[600px] p-10 rounded-2xl bg-white/10 backdrop-blur-lg mr-0 sm:mr-10 flex flex-col justify-between">
           <div className="flex flex-col items-center space-y-6">
             <h1 className="text-3xl font-bold text-white pt-4 mb-8">Sign In</h1>
@@ -122,7 +122,7 @@ function Login() {
               <p className="text-red-500 text-center w-full">{error}</p>
             )}
 
-            <form className="w-full max-w-sm space-y-6" onSubmit={handleSubmit}>
+            <form className="w-full max-w-sm " onSubmit={handleSubmit}>
               <div className="space-y-5">
                 {/* Email */}
                 <div>
@@ -221,7 +221,7 @@ function Login() {
           </div>
 
           {/* Signup link */}
-          <div className="text-center mt-0">
+          <div className="text-center">
             <span className="text-white">Don't have an account ? </span>
             <a
               href="/register"
