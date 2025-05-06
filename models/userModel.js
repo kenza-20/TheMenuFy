@@ -17,12 +17,7 @@ const userSchema = new Schema({
   image: { type: String },
 
   // Favorites: an array of Dish references
-  favorites: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Dish' // Refers to your Dish model
-    }
-  ],
+  favorites: [],
   allergies: [{ type: String, default: [] }],
   neighborhood: { type: String, default: "" },
   friends: [

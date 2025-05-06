@@ -12,7 +12,6 @@ router.post('/login',validateLogin,userController.login_post);
 router.post("/logout", userController.logout);
 // Route pour demander la réinitialisation du mot de passe
 router.post('/forgot-password', userController.forgotPassword);
-
 // Route pour réinitialiser le mot de passe
 router.post('/reset-password', userController.resetPassword);
 
@@ -71,7 +70,6 @@ router.post('/favorites/add', userController.addToFavorites);
 router.post('/favorites/remove', userController.removeFromFavorites);
 router.get("/behavioral-recommendations/:userId", getBehavioralRecommendations);
 router.get('/shared-recommendations/:userId', getSharedRecommendations);
-
 
 router.get('/level/:userId',userController.getOrderCountAndLoyaltyLevel);
 
