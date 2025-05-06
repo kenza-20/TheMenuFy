@@ -199,6 +199,9 @@ const Navbar = ({ authenticated }) => {
               <Link to="/scan" className="text-white hover:text-yellow-500 transition">
                 Scan QR
               </Link>
+              <Link to="/favorites" className="text-white hover:text-yellow-500 transition">
+                Favorites
+              </Link>
               <Link to="/mealCalendar" className="text-white hover:text-yellow-500">
                 Meal Calendar
               </Link>
