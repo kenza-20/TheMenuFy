@@ -12,6 +12,8 @@ import {
   ChevronDown,
   RefreshCw,
   ShoppingCart,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react"
 import axios from "axios"
 import jsPDF from "jspdf"
@@ -55,7 +57,7 @@ interface Order {
 
 const OrderHistory = () => {
   const [lastOrder, setLastOrder] = useState<Order | null>(null)
-  
+
   const [orders, setOrders] = useState<Order[]>([])
   const [filteredOrders, setFilteredOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
@@ -66,6 +68,12 @@ const OrderHistory = () => {
   const [reordering, setReordering] = useState<string | null>(null)
   const [orderNote, setOrderNote] = useState<string | null>(null)
   const [checkoutMode, setCheckoutMode] = useState<"direct" | "cart">("cart")
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1)
+  const [ordersPerPage] = useState(10)
+  const [paginatedOrders, setPaginatedOrders] = useState<Order[]>([])
+  const [totalPages, setTotalPages] = useState(1)
 
   const navigate = useNavigate()
   const id_user = typeof window !== "undefined" ? localStorage.getItem("userId") : null
@@ -122,19 +130,47 @@ const OrderHistory = () => {
 
     if (id_user) {
       fetchOrders()
-      fetchLastOrder() // <--- ajoute cette ligne ici
+      fetchLastOrder()
     } else {
       navigate("/login")
     }
   }, [id_user, navigate])
 
+  // Update pagination when filtered orders change
+  useEffect(() => {
+    if (filteredOrders.length > 0) {
+      setTotalPages(Math.ceil(filteredOrders.length / ordersPerPage))
+      updatePaginatedOrders(1)
+    } else {
+      setPaginatedOrders([])
+      setTotalPages(1)
+    }
+    // Reset to first page when filter changes
+    setCurrentPage(1)
+  }, [filteredOrders, ordersPerPage])
+
+  // Update paginated orders when page changes
+  const updatePaginatedOrders = (page: number) => {
+    const startIndex = (page - 1) * ordersPerPage
+    const endIndex = startIndex + ordersPerPage
+    setPaginatedOrders(filteredOrders.slice(startIndex, endIndex))
+    setCurrentPage(page)
+  }
+
+  // Handle page change
+  const handlePageChange = (page: number) => {
+    if (page < 1 || page > totalPages) return
+    updatePaginatedOrders(page)
+    // Scroll to top of the order list
+    document.getElementById("orders-container")?.scrollIntoView({ behavior: "smooth" })
+  }
 
   const fetchLastOrder = async () => {
     try {
       const res = await axios.get(`http://localhost:3000/api/user/last-order/${id_user}`)
       const order = res.data
       const orderDate = new Date(order.createdAt)
-  
+
       setLastOrder({
         id: order._id,
         date: orderDate.toLocaleDateString("en-US", {
@@ -154,15 +190,12 @@ const OrderHistory = () => {
           subtotal: item.price * item.quantity,
           image: item.image,
         })),
-        total: order.total
+        total: order.total,
       })
     } catch (err) {
       console.error("⚠️ Erreur fetch last order:", err)
     }
   }
-  
-
-
 
   useEffect(() => {
     if (dateFilter) {
@@ -519,6 +552,87 @@ const OrderHistory = () => {
     setOrderNote(null)
   }, [expandedOrder])
 
+  // Pagination component
+  const Pagination = () => {
+    // Generate page numbers array
+    const pageNumbers = []
+    const maxVisiblePages = 5
+
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2))
+    const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1)
+
+    // Adjust start page if we're near the end
+    if (endPage - startPage + 1 < maxVisiblePages) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1)
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pageNumbers.push(i)
+    }
+
+    return (
+      <div className="flex justify-center items-center mt-8 space-x-2">
+        <button
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+          className={`p-2 rounded-full ${
+            currentPage === 1 ? "text-white/40 cursor-not-allowed" : "text-white hover:bg-white/10"
+          } transition-colors`}
+          aria-label="Previous page"
+        >
+          <ChevronLeft className="h-5 w-5" />
+        </button>
+
+        {startPage > 1 && (
+          <>
+            <button
+              onClick={() => handlePageChange(1)}
+              className="px-3 py-1 rounded-md text-white hover:bg-white/10 transition-colors"
+            >
+              1
+            </button>
+            {startPage > 2 && <span className="text-white/60">...</span>}
+          </>
+        )}
+
+        {pageNumbers.map((number) => (
+          <button
+            key={number}
+            onClick={() => handlePageChange(number)}
+            className={`px-3 py-1 rounded-md ${
+              currentPage === number ? "bg-yellow-500 text-black" : "text-white hover:bg-white/10"
+            } transition-colors`}
+          >
+            {number}
+          </button>
+        ))}
+
+        {endPage < totalPages && (
+          <>
+            {endPage < totalPages - 1 && <span className="text-white/60">...</span>}
+            <button
+              onClick={() => handlePageChange(totalPages)}
+              className="px-3 py-1 rounded-md text-white hover:bg-white/10 transition-colors"
+            >
+              {totalPages}
+            </button>
+          </>
+        )}
+
+        <button
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          className={`p-2 rounded-full ${
+            currentPage === totalPages ? "text-white/40 cursor-not-allowed" : "text-white hover:bg-white/10"
+          } transition-colors`}
+          aria-label="Next page"
+        >
+          <ChevronRight className="h-5 w-5" />
+        </button>
+      </div>
+    )
+  }
+
   return (
     <div className="relative min-h-screen flex flex-col">
       {/* Background */}
@@ -535,36 +649,37 @@ const OrderHistory = () => {
         <div className="w-full max-w-7xl pt-15">
           <BlurContainer blur="xl" opacity={50} padding={8} rounded="2xl" className="w-full mx-auto p-6">
             <div className="flex flex-col items-center text-center">
-
-                <h2 className="text-3xl md:text-5xl font-bold text-white">Order History</h2>
-                <p className="mt-4 text-lg text-white">View your past orders and download invoices</p>
-                <motion.div
-                  className="mt-5 mb-8 border-b-4 border-yellow-500 w-48 rounded-full shadow-lg md:mx-0 mx-auto"
-                  initial={{ width: 0 }}
-                  animate={{ width: "12rem" }}
-                  transition={{ duration: 0.8, delay: 0.3 }}
-                  ></motion.div>
-                  </div>
+              <h2 className="text-3xl md:text-5xl font-bold text-white">Order History</h2>
+              <p className="mt-4 text-lg text-white">View your past orders and download invoices</p>
+              <motion.div
+                className="mt-5 mb-8 border-b-4 border-yellow-500 w-48 rounded-full shadow-lg md:mx-0 mx-auto"
+                initial={{ width: 0 }}
+                animate={{ width: "12rem" }}
+                transition={{ duration: 0.8, delay: 0.3 }}
+              ></motion.div>
+            </div>
             <div className="flex flex-col space-y-10">
-
-
-            {lastOrder && (
-  <div className="bg-yellow-500/10 text-white p-5 rounded-xl shadow mb-6">
-    <h3 className="text-lg font-bold mb-2">🕓 Your Last Order</h3>
-    <div className="flex flex-wrap justify-between items-center">
-      <div>
-        <p className="text-sm">Placed on: <span className="font-medium">{lastOrder.date} at {lastOrder.time}</span></p>
-        <p className="text-sm">Items: <span className="font-medium">{lastOrder.items.length}</span></p>
-      </div>
-      <div>
-        <p className="text-sm font-semibold text-yellow-400">Total: ${lastOrder.total.toFixed(2)}</p>
-      </div>
-    </div>
-  </div>
-)}
-
-
-
+              {lastOrder && (
+                <div className="bg-yellow-500/10 text-white p-5 rounded-xl shadow mb-6">
+                  <h3 className="text-lg font-bold mb-2">🕓 Your Last Order</h3>
+                  <div className="flex flex-wrap justify-between items-center">
+                    <div>
+                      <p className="text-sm">
+                        Placed on:{" "}
+                        <span className="font-medium">
+                          {lastOrder.date} at {lastOrder.time}
+                        </span>
+                      </p>
+                      <p className="text-sm">
+                        Items: <span className="font-medium">{lastOrder.items.length}</span>
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-yellow-400">Total: ${lastOrder.total.toFixed(2)}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Header Section with Search and Download Options */}
               <div className="flex flex-col md:flex-row justify-between items-center gap-6">
@@ -573,8 +688,7 @@ const OrderHistory = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6 }}
-                >
-                </motion.div>
+                ></motion.div>
 
                 <motion.div
                   style={{ display: "flex", justifyContent: "center", alignItems: "center" }}
@@ -691,222 +805,235 @@ const OrderHistory = () => {
               </div>
 
               {/* Orders List */}
-              {loading ? (
-                <div className="flex justify-center items-center py-20">
-                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-yellow-500"></div>
-                </div>
-              ) : filteredOrders.length === 0 ? (
-                <motion.div
-                  className="text-center py-10"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.5 }}
-                >
-                  {dateFilter ? (
-                    <>
-                      <Calendar className="mx-auto h-16 w-16 text-yellow-500 mb-4" />
-                      <h3 className="text-xl font-semibold text-white mb-2">No Orders Found</h3>
-                      <p className="text-white/80">No orders match your search criteria.</p>
-                      <button
-                        onClick={clearDateFilter}
-                        className="mt-6 px-6 py-2 bg-yellow-500 text-black rounded-full hover:bg-yellow-400 transition-colors"
+              <div id="orders-container">
+                {loading ? (
+                  <div className="flex justify-center items-center py-20">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-yellow-500"></div>
+                  </div>
+                ) : filteredOrders.length === 0 ? (
+                  <motion.div
+                    className="text-center py-10"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    {dateFilter ? (
+                      <>
+                        <Calendar className="mx-auto h-16 w-16 text-yellow-500 mb-4" />
+                        <h3 className="text-xl font-semibold text-white mb-2">No Orders Found</h3>
+                        <p className="text-white/80">No orders match your search criteria.</p>
+                        <button
+                          onClick={clearDateFilter}
+                          className="mt-6 px-6 py-2 bg-yellow-500 text-black rounded-full hover:bg-yellow-400 transition-colors"
+                        >
+                          Clear Filter
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <ShoppingBag className="mx-auto h-16 w-16 text-yellow-500 mb-4" />
+                        <h3 className="text-xl font-semibold text-white mb-2">No Orders Yet</h3>
+                        <p className="text-white/80">You haven't placed any orders yet.</p>
+                        <button
+                          onClick={() => navigate("/resto/2/menu")}
+                          className="mt-6 px-6 py-2 bg-yellow-500 text-black rounded-full hover:bg-yellow-400 transition-colors"
+                        >
+                          Browse Menu
+                        </button>
+                      </>
+                    )}
+                  </motion.div>
+                ) : (
+                  <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
+                    {paginatedOrders.map((order) => (
+                      <motion.div
+                        key={order.id}
+                        variants={itemVariants}
+                        className="bg-black/10 rounded-xl backdrop-blur-sm overflow-hidden"
                       >
-                        Clear Filter
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <ShoppingBag className="mx-auto h-16 w-16 text-yellow-500 mb-4" />
-                      <h3 className="text-xl font-semibold text-white mb-2">No Orders Yet</h3>
-                      <p className="text-white/80">You haven't placed any orders yet.</p>
-                      <button
-                        onClick={() => navigate("/resto/2/menu")}
-                        className="mt-6 px-6 py-2 bg-yellow-500 text-black rounded-full hover:bg-yellow-400 transition-colors"
-                      >
-                        Browse Menu
-                      </button>
-                    </>
-                  )}
-                </motion.div>
-              ) : (
-                <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
-                  {filteredOrders.map((order) => (
-                    <motion.div
-                      key={order.id}
-                      variants={itemVariants}
-                      className="bg-black/10 rounded-xl backdrop-blur-sm overflow-hidden"
-                    >
-                      {/* Order Header */}
-                      <div
-                        className="p-4 cursor-pointer hover:bg-white/5 transition-colors"
-                        onClick={() => toggleOrderDetails(order.id)}
-                      >
-                        <div className="flex flex-wrap justify-between items-center">
-                          <div className="flex items-center space-x-4">
-                            <div className="bg-yellow-500/20 p-2 rounded-full">
-                              <ShoppingBag className="h-6 w-6 text-yellow-500" />
-                            </div>
-                            <div>
-                              <h3 className="text-lg font-semibold text-white">Order #{order.id.slice(-6)}</h3>
-                              <div className="flex items-center text-white/70 text-sm">
-                                <Calendar className="h-4 w-4 mr-1" />
-                                <span>
-                                  {order.date} at {order.time}
-                                </span>
+                        {/* Order Header */}
+                        <div
+                          className="p-4 cursor-pointer hover:bg-white/5 transition-colors"
+                          onClick={() => toggleOrderDetails(order.id)}
+                        >
+                          <div className="flex flex-wrap justify-between items-center">
+                            <div className="flex items-center space-x-4">
+                              <div className="bg-yellow-500/20 p-2 rounded-full">
+                                <ShoppingBag className="h-6 w-6 text-yellow-500" />
+                              </div>
+                              <div>
+                                <h3 className="text-lg font-semibold text-white">Order #{order.id.slice(-6)}</h3>
+                                <div className="flex items-center text-white/70 text-sm">
+                                  <Calendar className="h-4 w-4 mr-1" />
+                                  <span>
+                                    {order.date} at {order.time}
+                                  </span>
+                                </div>
                               </div>
                             </div>
-                          </div>
-                          <div className="flex items-center space-x-4">
-                            <div className="text-right">
-                              <div className="flex items-center text-yellow-500 font-semibold">
-                                <DollarSign className="h-4 w-4" />
-                                <span>{order.total.toFixed(2)}</span>
+                            <div className="flex items-center space-x-4">
+                              <div className="text-right">
+                                <div className="flex items-center text-yellow-500 font-semibold">
+                                  <DollarSign className="h-4 w-4" />
+                                  <span>{order.total.toFixed(2)}</span>
+                                </div>
+                                <span className="text-white/70 text-sm">{order.items.length} items</span>
                               </div>
-                              <span className="text-white/70 text-sm">{order.items.length} items</span>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  generateInvoice(order)
+                                }}
+                                className="p-2 bg-yellow-500/20 rounded-full hover:bg-yellow-500/30 transition-colors"
+                                title="Download Invoice"
+                              >
+                                <Download className="h-5 w-5 text-yellow-500" />
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  // Update the order with the edited note before reordering
+                                  const updatedOrder = {
+                                    ...order,
+                                    noteCommande: orderNote !== null ? orderNote : order.noteCommande,
+                                  }
+                                  handleReorder(updatedOrder)
+                                }}
+                                disabled={reordering === order.id}
+                                className={`p-2 ${
+                                  reordering === order.id
+                                    ? "bg-green-500/20 cursor-not-allowed"
+                                    : "bg-green-500/20 hover:bg-green-500/30"
+                                } rounded-full transition-colors`}
+                                title={checkoutMode === "direct" ? "Direct Checkout" : "Add to Cart"}
+                              >
+                                {reordering === order.id ? (
+                                  <div className="animate-spin h-5 w-5 border-2 border-green-500/20 border-t-green-500 rounded-full"></div>
+                                ) : checkoutMode === "direct" ? (
+                                  <RefreshCw className="h-5 w-5 text-green-500" />
+                                ) : (
+                                  <ShoppingCart className="h-5 w-5 text-green-500" />
+                                )}
+                              </button>
                             </div>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                generateInvoice(order)
-                              }}
-                              className="p-2 bg-yellow-500/20 rounded-full hover:bg-yellow-500/30 transition-colors"
-                              title="Download Invoice"
-                            >
-                              <Download className="h-5 w-5 text-yellow-500" />
-                            </button>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                // Update the order with the edited note before reordering
-                                const updatedOrder = {
-                                  ...order,
-                                  noteCommande: orderNote !== null ? orderNote : order.noteCommande,
-                                }
-                                handleReorder(updatedOrder)
-                              }}
-                              disabled={reordering === order.id}
-                              className={`p-2 ${
-                                reordering === order.id
-                                  ? "bg-green-500/20 cursor-not-allowed"
-                                  : "bg-green-500/20 hover:bg-green-500/30"
-                              } rounded-full transition-colors`}
-                              title={checkoutMode === "direct" ? "Direct Checkout" : "Add to Cart"}
-                            >
-                              {reordering === order.id ? (
-                                <div className="animate-spin h-5 w-5 border-2 border-green-500/20 border-t-green-500 rounded-full"></div>
-                              ) : checkoutMode === "direct" ? (
-                                <RefreshCw className="h-5 w-5 text-green-500" />
-                              ) : (
-                                <ShoppingCart className="h-5 w-5 text-green-500" />
-                              )}
-                            </button>
                           </div>
                         </div>
-                      </div>
 
-                      {/* Order Details */}
-                      <AnimatePresence>
-                        {expandedOrder === order.id && (
-                          <motion.div
-                            variants={detailsVariants}
-                            initial="hidden"
-                            animate="visible"
-                            exit="hidden"
-                            className="border-t border-white/10 overflow-hidden"
-                          >
-                            <div className="p-4">
-                              <h4 className="text-white font-medium mb-3">Order Items</h4>
-                              <div className="space-y-4">
-                                {order.items.map((item, itemIndex) => (
-                                  <div key={itemIndex} className="flex items-center space-x-4">
-                                    <img
-                                      src={item.image || "/placeholder.svg"}
-                                      alt={item.name}
-                                      className="w-16 h-16 object-cover rounded-lg"
+                        {/* Order Details */}
+                        <AnimatePresence>
+                          {expandedOrder === order.id && (
+                            <motion.div
+                              variants={detailsVariants}
+                              initial="hidden"
+                              animate="visible"
+                              exit="hidden"
+                              className="border-t border-white/10 overflow-hidden"
+                            >
+                              <div className="p-4">
+                                <h4 className="text-white font-medium mb-3">Order Items</h4>
+                                <div className="space-y-4">
+                                  {order.items.map((item, itemIndex) => (
+                                    <div key={itemIndex} className="flex items-center space-x-4">
+                                      <img
+                                        src={item.image || "/placeholder.svg"}
+                                        alt={item.name}
+                                        className="w-16 h-16 object-cover rounded-lg"
+                                      />
+                                      <div className="flex-1">
+                                        <h5 className="text-white font-medium">{item.name}</h5>
+                                        <p className="text-white/70 text-sm">Quantity: {item.quantity}</p>
+                                      </div>
+                                      <div className="text-right">
+                                        <p className="text-white font-medium">${item.subtotal.toFixed(2)}</p>
+                                        <p className="text-white/70 text-sm">${item.price.toFixed(2)} each</p>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+
+                                {/* Display order note with edit functionality */}
+                                <div className="mt-4 pt-4 border-t border-white/10">
+                                  <h5 className="text-white font-medium mb-2">Order Notes:</h5>
+                                  {expandedOrder === order.id && checkoutMode === "direct" ? (
+                                    <textarea
+                                      value={orderNote !== null ? orderNote : order.noteCommande || ""}
+                                      onChange={(e) => setOrderNote(e.target.value)}
+                                      className="w-full h-13 p-3 bg-white/5 text-white/80 rounded-md border border-white/20 focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                                      placeholder="Add special instructions, allergies, etc..."
+                                      rows={3}
                                     />
-                                    <div className="flex-1">
-                                      <h5 className="text-white font-medium">{item.name}</h5>
-                                      <p className="text-white/70 text-sm">Quantity: {item.quantity}</p>
-                                    </div>
-                                    <div className="text-right">
-                                      <p className="text-white font-medium">${item.subtotal.toFixed(2)}</p>
-                                      <p className="text-white/70 text-sm">${item.price.toFixed(2)} each</p>
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-
-                              {/* Display order note with edit functionality */}
-                              <div className="mt-4 pt-4 border-t border-white/10">
-                                <h5 className="text-white font-medium mb-2">Order Notes:</h5>
-                                {expandedOrder === order.id && checkoutMode === "direct" ? (
-                                  <textarea
-                                    value={orderNote !== null ? orderNote : order.noteCommande || ""}
-                                    onChange={(e) => setOrderNote(e.target.value)}
-                                    className="w-full h-13 p-3 bg-white/5 text-white/80 rounded-md border border-white/20 focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                                    placeholder="Add special instructions, allergies, etc..."
-                                    rows={3}
-                                  />
-                                ) : (
-                                  <p className="text-white/80 bg-white/5 p-3 rounded-md">
-                                    {order.noteCommande || "No notes added"}
-                                  </p>
-                                )}
-                              </div>
-
-                              <div className="mt-4 pt-4 border-t border-white/10 flex justify-between">
-                                <span className="text-white font-medium">Total</span>
-                                <span className="text-yellow-500 font-bold">${order.total.toFixed(2)}</span>
-                              </div>
-                              <div className="mt-4 flex justify-between">
-                                <button
-                                  onClick={() => {
-                                    // Update the order with the edited note before reordering
-                                    const updatedOrder = {
-                                      ...order,
-                                      noteCommande: orderNote !== null ? orderNote : order.noteCommande,
-                                    }
-                                    handleReorder(updatedOrder)
-                                  }}
-                                  disabled={reordering === order.id}
-                                  className={`flex items-center space-x-2 px-4 py-2 ${
-                                    reordering === order.id
-                                      ? "bg-green-500/50 cursor-not-allowed"
-                                      : "bg-green-500 hover:bg-green-400"
-                                  } text-white rounded-full transition-colors`}
-                                >
-                                  {reordering === order.id ? (
-                                    <>
-                                      <div className="animate-spin h-4 w-4 border-2 border-white/20 border-t-white rounded-full mr-2"></div>
-                                      <span>Processing...</span>
-                                    </>
-                                  ) : checkoutMode === "direct" ? (
-                                    <>
-                                      <RefreshCw className="h-4 w-4" />
-                                      <span>Direct Checkout</span>
-                                    </>
                                   ) : (
-                                    <>
-                                      <ShoppingCart className="h-4 w-4" />
-                                      <span>Add to Cart</span>
-                                    </>
+                                    <p className="text-white/80 bg-white/5 p-3 rounded-md">
+                                      {order.noteCommande || "No notes added"}
+                                    </p>
                                   )}
-                                </button>
-                                <button
-                                  onClick={() => generateInvoice(order)}
-                                  className="flex items-center space-x-2 px-4 py-2 bg-yellow-500 text-black rounded-full hover:bg-yellow-400 transition-colors"
-                                >
-                                  <FileText className="h-4 w-4" />
-                                  <span>Download Invoice</span>
-                                </button>
+                                </div>
+
+                                <div className="mt-4 pt-4 border-t border-white/10 flex justify-between">
+                                  <span className="text-white font-medium">Total</span>
+                                  <span className="text-yellow-500 font-bold">${order.total.toFixed(2)}</span>
+                                </div>
+                                <div className="mt-4 flex justify-between">
+                                  <button
+                                    onClick={() => {
+                                      // Update the order with the edited note before reordering
+                                      const updatedOrder = {
+                                        ...order,
+                                        noteCommande: orderNote !== null ? orderNote : order.noteCommande,
+                                      }
+                                      handleReorder(updatedOrder)
+                                    }}
+                                    disabled={reordering === order.id}
+                                    className={`flex items-center space-x-2 px-4 py-2 ${
+                                      reordering === order.id
+                                        ? "bg-green-500/50 cursor-not-allowed"
+                                        : "bg-green-500 hover:bg-green-400"
+                                    } text-white rounded-full transition-colors`}
+                                  >
+                                    {reordering === order.id ? (
+                                      <>
+                                        <div className="animate-spin h-4 w-4 border-2 border-white/20 border-t-white rounded-full mr-2"></div>
+                                        <span>Processing...</span>
+                                      </>
+                                    ) : checkoutMode === "direct" ? (
+                                      <>
+                                        <RefreshCw className="h-4 w-4" />
+                                        <span>Direct Checkout</span>
+                                      </>
+                                    ) : (
+                                      <>
+                                        <ShoppingCart className="h-4 w-4" />
+                                        <span>Add to Cart</span>
+                                      </>
+                                    )}
+                                  </button>
+                                  <button
+                                    onClick={() => generateInvoice(order)}
+                                    className="flex items-center space-x-2 px-4 py-2 bg-yellow-500 text-black rounded-full hover:bg-yellow-400 transition-colors"
+                                  >
+                                    <FileText className="h-4 w-4" />
+                                    <span>Download Invoice</span>
+                                  </button>
+                                </div>
                               </div>
-                            </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </motion.div>
-                  ))}
-                </motion.div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </motion.div>
+                    ))}
+                  </motion.div>
+                )}
+              </div>
+
+              {/* Pagination */}
+              {filteredOrders.length > 0 && <Pagination />}
+
+              {/* Order count summary */}
+              {filteredOrders.length > 0 && (
+                <div className="text-center text-white/70 text-sm mt-4">
+                  Showing {paginatedOrders.length} of {filteredOrders.length} orders
+                  {dateFilter && ` (filtered by "${dateFilter}")`}
+                </div>
               )}
             </div>
           </BlurContainer>

@@ -1,4 +1,4 @@
-"use client"
+""
 
 import { useState, useEffect } from "react"
 import { FaPlus, FaHeart } from "react-icons/fa"

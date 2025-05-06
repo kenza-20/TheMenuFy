@@ -1,4 +1,4 @@
-"use client"
+""
 
 import { useRef, useEffect } from "react"
 import mapboxgl from "mapbox-gl" // Using mapbox-gl
