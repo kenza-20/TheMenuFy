@@ -8,7 +8,7 @@ const askMenuBot = async (req, res) => {
   }
 
   try {
-    const response = await axios.post("http://localhost:11434/api/chat", {
+    const response = await axios.post("http://127.0.0.1:11434/api/chat", {
       model: "llama3",
       stream: false, // ← très important pour avoir tout d'un coup
       messages: [
