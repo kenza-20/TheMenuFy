@@ -40,5 +40,14 @@ The app calculates calories, recommends meals using AI, and allows users to plac
 | GET    | `/api/order/history` | Fetch user's order history         |
 
 ---
+---
+
+## 🧪 Example: Test the Application
+
+### 🔐 Step 1: Log in
+- **Email**: `sarra.benhamouda7@gmail.com`  
+- **Password**: `SaBh22!!`
+
+
 
 > 💡 *This project is built with MERN (MongoDB, Express.js, React, Node.js) and focuses on health-centric food customization powered by AI.*
