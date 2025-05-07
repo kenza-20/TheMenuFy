@@ -1,4 +1,4 @@
-""
+"use client"
 
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
@@ -83,31 +83,32 @@ function LandingPage() {
         console.log("Top Sellers Response:", topSellersResponse.data)
 
         if (topSellersResponse.data && Array.isArray(topSellersResponse.data)) {
-          setTopSellers(topSellersResponse.data)
-
-          // Set the main image if there are any top sellers
-          if (topSellersResponse.data.length > 0) {
-            setMainImage(topSellersResponse.data[0].image)
-
-            // Get the category of the first top seller to fetch similar dishes
-            const firstItemCategory = topSellersResponse.data[0].category
-
+          // Filter out any null items
+          const validTopSellers = topSellersResponse.data.filter((item) => item !== null)
+        
+          setTopSellers(validTopSellers)
+        
+          if (validTopSellers.length > 0) {
+            const firstItem = validTopSellers[0]
+            setMainImage(firstItem.image)
+        
+            const firstItemCategory = firstItem.category
+        
             if (firstItemCategory) {
-              // Fetch similar dishes by category using the correct endpoint
               try {
                 const similarResponse = await axios.get(
-                  `http://localhost:3000/api/recipes/similar_products/${firstItemCategory}`,
+                  `http://localhost:3000/api/recipes/similar_products/${firstItemCategory}`
                 )
                 console.log("Similar Dishes Response:", similarResponse.data)
-
+        
                 if (similarResponse.data && Array.isArray(similarResponse.data)) {
-                  // Filter out duplicates that are already in top sellers
-                  const topSellerIds = new Set(topSellersResponse.data.map((item) => item._id))
-                  const filteredSimilarDishes = similarResponse.data.filter((item) => !topSellerIds.has(item._id))
-
+                  const topSellerIds = new Set(validTopSellers.map((item) => item._id))
+                  const filteredSimilarDishes = similarResponse.data.filter(
+                    (item) => item && !topSellerIds.has(item._id)
+                  )
+        
                   setSimilarDishes(filteredSimilarDishes)
-                } 
-                else {
+                } else {
                   setSimilarDishes([])
                 }
               } catch (similarError) {
@@ -120,6 +121,8 @@ function LandingPage() {
           console.error("Invalid data format received from API:", topSellersResponse.data)
           setTopSellers([])
         }
+        
+        
       } catch (error) {
         console.error("Error fetching menu items:", error)
         setError("Failed to load menu items. Please try again later.")

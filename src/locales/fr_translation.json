@@ -22,11 +22,12 @@
     "error": "Erreur :"
   },
   
-    "settings": {
+    "settingss": {
       "dark_mode": "Mode Sombre",
       "notifications": "Notifications",
       "language": "Langue",
-      "save": "Enregistrer"
+      "save": "Enregistrer",
+      "Settings": "Paramettres"
     },
     "categories": {
       "starters": "Entrées",

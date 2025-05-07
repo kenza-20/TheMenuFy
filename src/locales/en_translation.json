@@ -22,11 +22,12 @@
     "error": "Error:"
   },
   
-    "settings": {
+    "settingss": {
       "dark_mode": "Dark Mode",
       "notifications": "Notifications",
       "language": "Language",
-      "save": "Save Settings"
+      "save": "Save Settings",
+      "Settings": "Settings"
     },
     "categories": {
       "starters": "Starters",
@@ -41,5 +42,6 @@
     "alreadyInFavorites": "{{item}} is already in favorites!",
     "addedToFavorites": "Added to favorites: {{item}}",
     "purchased": "Purchased {{count}}×"
+    
   }
   

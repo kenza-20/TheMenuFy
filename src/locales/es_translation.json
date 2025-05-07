@@ -22,15 +22,13 @@
     "error": "Error:"
   }
   ,
-    "settings": {
+    "settingss": {
       "dark_mode": "Modo Oscuro",
       "notifications": "Notificaciones",
       "language": "Idioma",
       "save": "Guardar Ajustes",
       
-        "settings": {
-          "title": "Configuraciones"
-        }
+        "Settings": "Configuración"
       
       
     },

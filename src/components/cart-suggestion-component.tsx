@@ -84,8 +84,17 @@ const CartSuggestions = ({ cartItems, userId, onAddToCart }: SuggestionProps) =>
 
   // Filter out items that are already in the cart from both recommendation lists
   const cartItemIds = new Set(cartItems.map((item:any) => item.id))
-  const filteredTopSellers = topSellers.filter((item:any) => !cartItemIds.has(item.price_id))
-  const filteredRecommendations = recommendations.filter((item:any) => !cartItemIds.has(item.price_id))
+
+   const filteredTopSellers = topSellers.filter(
+     (item: any) => item && item.price_id && !cartItemIds.has(item.price_id)
+   )
+  
+   const filteredRecommendations = recommendations.filter(
+     (item: any) => item && item.price_id && !cartItemIds.has(item.price_id)
+   )
+  
+ //const filteredTopSellers = topSellers.filter((item:any) => !cartItemIds.has(item.price_id))
+ //const filteredRecommendations = recommendations.filter((item:any) => !cartItemIds.has(item.price_id))
 
   if (loading) {
     return (
