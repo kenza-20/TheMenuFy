@@ -1,0 +1,45 @@
+{
+    "blogTips": {
+    "title": "Conseils pour une alimentation saine",
+    "loading": "Chargement...",
+    "error": "Impossible de charger les conseils. Veuillez réessayer plus tard.",
+    "noTips": "Aucun conseil disponible.",
+    "date": "Publié le"
+  }
+  ,
+    "reservation": {
+    "title": "Faire une réservation",
+    "email": "Email",
+    "date": "Date",
+    "time": "Heure",
+    "guests": "Invités",
+    "requests": "Demandes spéciales",
+    "requestsPlaceholder": "Des instructions particulières ?",
+    "submit": "Envoyer la réservation",
+    "userNotFound": "Utilisateur non trouvé dans le stockage local.",
+    "missingUserId": "L'identifiant utilisateur est manquant. Veuillez vous reconnecter.",
+    "success": "Réservation ajoutée avec succès ! Un e-mail de confirmation a été envoyé.",
+    "error": "Erreur :"
+  },
+  
+    "settings": {
+      "dark_mode": "Mode Sombre",
+      "notifications": "Notifications",
+      "language": "Langue",
+      "save": "Enregistrer"
+    },
+    "categories": {
+      "starters": "Entrées",
+      "mains": "Plats",
+      "desserts": "Desserts",
+      "mostPurchased": "Le plus acheté"
+    },
+    "search": "Rechercher",
+    "add": "Ajouter",
+    "addedToCart": "Ajouté au panier !",
+    "alreadyInCart": "Déjà dans le panier",
+    "alreadyInFavorites": "{{item}} est déjà dans les favoris !",
+    "addedToFavorites": "Ajouté aux favoris : {{item}}",
+    "purchased": "Acheté {{count}}×"
+  }
+  
