@@ -1,0 +1,49 @@
+{
+    "blogTips": {
+    "title": "Consejos para comer saludablemente",
+    "loading": "Cargando...",
+    "error": "No se pudieron cargar los consejos. Inténtalo de nuevo más tarde.",
+    "noTips": "No hay consejos disponibles.",
+    "date": "Publicado el"
+  }
+  ,
+    "reservation": {
+    "title": "Hacer una reserva",
+    "email": "Correo electrónico",
+    "date": "Fecha",
+    "time": "Hora",
+    "guests": "Invitados",
+    "requests": "Peticiones especiales",
+    "requestsPlaceholder": "¿Alguna instrucción especial?",
+    "submit": "Enviar reserva",
+    "userNotFound": "Usuario no encontrado en el almacenamiento local.",
+    "missingUserId": "Falta el ID del usuario. Por favor, inicia sesión nuevamente.",
+    "success": "¡Reserva añadida con éxito! Se ha enviado un correo de confirmación.",
+    "error": "Error:"
+  }
+  ,
+    "settingss": {
+      "dark_mode": "Modo Oscuro",
+      "notifications": "Notificaciones",
+      "language": "Idioma",
+      "save": "Guardar Ajustes",
+      
+        "Settings": "Configuración"
+      
+      
+    },
+    "categories": {
+      "starters": "Entrantes",
+      "mains": "Platos principales",
+      "desserts": "Postres",
+      "mostPurchased": "Más comprado"
+    },
+    "search": "Buscar",
+    "add": "Agregar",
+    "addedToCart": "¡Agregado al carrito!",
+    "alreadyInCart": "Ya está en el carrito",
+    "alreadyInFavorites": "¡{{item}} ya está en favoritos!",
+    "addedToFavorites": "Agregado a favoritos: {{item}}",
+    "purchased": "Comprado {{count}}×"
+  }
+  
