@@ -39,6 +39,8 @@ import WeatherRecommendations from "./pages/WeatherRecommendations";
 import Mood from "./pages/Mood";
 import Dashboard from "./pages/dahsboard"; // en haut du fichier
 
+import ViewCart from './pages/ViewCart'; // Adjust the path based on your file structure
+
 
 import WhatsAppContactPage from "./pages/contact";
 import ChatSupport from "./components/chat-support";
@@ -114,6 +116,7 @@ const App = () => {
           <Route path="/meteo" element={<WeatherRecommendations />}/>
           <Route path="/mood" element={<Mood />}/>
           <Route path="/dashboard" element={authenticated ? <Dashboard /> : <Navigate to="/" />} />
+          <Route path="/view-cart/:userId" element={<ViewCart />} />
 
 
 

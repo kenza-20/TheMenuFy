@@ -16,9 +16,14 @@ import Swal from "sweetalert2"
 import { ShoppingBag } from "lucide-react"
 import CartSuggestions from "../components/cart-suggestion-component"
 
+import QRCode from 'react-qr-code';
+
+
 //   4000001240000000
 
 const Panier = () => {
+ 
+
   const [meals, setMeals] = useState([])
   const [quantities, setQuantities] = useState({})
   const [loading, setLoading] = useState(true)
@@ -26,6 +31,26 @@ const Panier = () => {
   const navigate = useNavigate()
   const id_user = typeof window !== "undefined" ? localStorage.getItem("userId") : null
   const [orderNote, setOrderNote] = useState("")
+
+  ///////////////////////////
+  const [qrCode, setQrCode] = useState(null);
+
+useEffect(() => {
+  const fetchQRCode = async () => {
+    try {
+      const response = await axios.get(`http://localhost:3000/api/orders/${id_user}/qrcode`);
+      setQrCode(response.data.qrCode); // dataURL
+    } catch (err) {
+      console.error("Failed to load QR code:", err);
+    }
+  };
+
+  if (id_user) {
+    fetchQRCode();
+  }
+}, [id_user,meals, quantities]);
+
+  ///////////////////////////
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -410,6 +435,16 @@ const Panier = () => {
                 <Button onClick={handleCheckout} className="mt-4">
                   Checkout
                 </Button>
+
+                <p className="text-white text-sm mb-2">Scan to view this cart:</p>
+                
+                {qrCode && (
+  <div className="flex justify-center mt-8">
+    <img src={qrCode} alt="Order QR Code" className="w-40 h-40" />
+  </div>
+)}
+
+    
               </div>
             </div>
           </>

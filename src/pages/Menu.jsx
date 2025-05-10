@@ -7,6 +7,8 @@ import axios from "axios"
 import Swal from "sweetalert2"
 import { useTranslation } from 'react-i18next';
 
+import QRCode from 'react-qr-code';
+
 const Menu = () => {
   const { t, i18n } = useTranslation();
   const [activeCategory, setActiveCategory] = useState("starters")
@@ -25,6 +27,7 @@ const Menu = () => {
   const userId = localStorage.getItem("userId")
   const token = localStorage.getItem("token")
   const navigate = useNavigate()
+
 
   const handleMostPurchased = async () => {
     const token = localStorage.getItem("token");
@@ -59,6 +62,41 @@ const Menu = () => {
       console.error("Error fetching most purchased dishes:", error);
     }
   };
+
+
+///////////////////////////////
+ const [meals, setMeals] = useState([])
+  const [quantities, setQuantities] = useState({})
+  
+
+  
+  const id_user = typeof window !== "undefined" ? localStorage.getItem("userId") : null
+  const [orderNote, setOrderNote] = useState("")
+ const [qrCode, setQrCode] = useState(null);
+
+useEffect(() => {
+  const fetchQRCode = async () => {
+    try {
+      const response = await axios.get(`http://localhost:3000/api/orders/${id_user}/qrcode`);
+      setQrCode(response.data.qrCode); // dataURL
+    } catch (err) {
+      console.error("Failed to load QR code:", err);
+    }
+  };
+
+  if (id_user) {
+    fetchQRCode();
+  }
+}, [id_user,meals, quantities]);
+
+///////////////////////////
+
+
+
+
+
+
+
 
   // Load user settings and goal
   useEffect(() => {
@@ -356,6 +394,13 @@ const Menu = () => {
               {t('categories.mostPurchased')}
             </button>
           </div>
+
+{qrCode && (
+  <div className="flex justify-center mt-8">
+    <img src={qrCode} alt="Order QR Code" className="w-40 h-40" />
+  </div>
+)}
+
 
           {/* Search Input */}
           <div className="mb-8 flex items-center space-x-2">
