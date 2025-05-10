@@ -1,6 +1,28 @@
 
 const Order = require('../models/orderModel');
+const QRCode = require('qrcode');
 
+exports.generateOrderQRCode = async (req, res) => {
+  try {
+    const orders = await Order.find({ id_user: req.params.id_user });
+
+    if (!orders || orders.length === 0) {
+      return res.status(404).json({ error: "No orders found for this user" });
+    }
+
+    // Prepare order summary (you can customize this)
+    const summary = orders.map(order => 
+      `${order.name} x${order.quantity}`
+    ).join('\n');
+
+    // Generate QR Code
+    const qrCodeDataURL = await QRCode.toDataURL(summary);
+
+    res.status(200).json({ qrCode: qrCodeDataURL });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 // CREATE
 exports.addOrder = async (req, res) => {
   try {
