@@ -24,6 +24,8 @@ const tipRoutes = require('./routes/tipRoutes');
 const placedOrdersRoutes = require('./routes/placedOrdersRoutes');
 const weatherRoutes = require('./routes/weatherRoutes');
 const groupOrderRoutes = require('./routes/groupOrderRoutes');
+const AnalyzerAndImageGeneratory = require('./routes/foodAnalyzer');
+const culturalStory = require('./routes/culturalStory');
 
 // Middleware
 app.use(cors({
@@ -51,6 +53,8 @@ app.use("/api/chat", chatRoute);
 app.use('/api/weather', weatherRoutes);
 app.use('/api/voice', voiceCommandsRoutes);
 app.use('/api/group-orders', groupOrderRoutes);
+app.use('/api/analyzer', AnalyzerAndImageGeneratory);
+app.use('/api/cultural-story', culturalStory);
 
 app.post('/webhook', (req, res) => {
   console.log("Requête reçue de Dialogflow :", req.body);
