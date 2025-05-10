@@ -1,12 +1,11 @@
-""
-
-import { useState, useEffect } from "react"
-import { Link, useLocation, useNavigate } from "react-router-dom"
-import { User, Menu, X, Bell, Info, MessageSquare } from "lucide-react"
+import { useLocation,Link, useNavigate } from "react-router-dom"
+import { User, Info, MessageSquare } from "lucide-react"
+import { Menu } from "lucide-react"
 import { useDispatch } from "react-redux"
 import axios from "axios"
-import ActiveGroupOrdersButton from '../components/group-order/active-orders-button';
+import ActiveGroupOrdersButton from "../components/group-order/active-orders-button"
 
+import { useState, useEffect } from "react"
 
 // Add this style for the Gold badge shine animation
 const shineAnimation = `
@@ -35,6 +34,7 @@ const Navbar = ({ authenticated }) => {
   const [showLoyaltyTooltip, setShowLoyaltyTooltip] = useState(false)
   const [orderCount, setOrderCount] = useState(0)
   const [loyaltyLevel, setLoyaltyLevel] = useState("Bronze")
+  const [showHint, setShowHint] = useState(true)
 
   const handleLogout = () => {
     localStorage.removeItem("userDetails")
@@ -80,7 +80,11 @@ const Navbar = ({ authenticated }) => {
     if (userId) {
       fetchLevel()
     }
-  }, [])
+  }, [userId])
+
+  const triggerSidebarOpen = () => {
+    document.dispatchEvent(new CustomEvent("logo-click"))
+  }
 
   // Loyalty level descriptions and benefits
   const loyaltyInfo = {
@@ -112,6 +116,14 @@ const Navbar = ({ authenticated }) => {
     },
   }
 
+  // Hide the hint after 5 seconds
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowHint(false)
+    }, 5000)
+    return () => clearTimeout(timer)
+  }, [showHint])
+
   // Add this style tag to the component
   return (
     <>
@@ -123,17 +135,44 @@ const Navbar = ({ authenticated }) => {
                     bg-amber-800/10 backdrop-blur-sm shadow-lg z-50 transition-all"
       >
         {/* Logo */}
-        <div className="flex items-center space-x-4">
-          <img src="logo.png" alt="Logo" className="h-8" />
-          <Link to="/" className="text-white hover:text-yellow-500 transition">
-            <h1 className="text-2xl font-bold">TheMenuFy</h1>
-          </Link>
+        <div className="flex items-center space-x-4 relative">
+          <div className="flex items-center cursor-pointer group" onClick={triggerSidebarOpen}>
+            <div className="relative">
+              {/* <Menu className="h-5 w-5 text-yellow-500 mr-2 md:block hidden" /> */}
+              <img src="/logo.png" alt="Logo" className="h-8 transition-transform duration-300 group-hover:scale-105" />
+
+              {/* Pulsing effect around logo */}
+              <div className="absolute inset-0 rounded-full bg-yellow-500/10 animate-pulse z-10 scale-150 hidden md:block"></div>
+            </div>
+
+            <Link to="/" className="text-white hover:text-yellow-500 transition">
+              <h1 className="text-2xl font-bold">TheMenuFy</h1>
+            </Link>
+
+            {/* Tooltip that appears on hover */}
+            <div className="absolute hidden group-hover:block top-full left-0 mt-1 bg-black/80 text-white text-xs py-1 px-2 rounded whitespace-nowrap border border-yellow-500/30">
+              Click to open menu
+            </div>
+          </div>
+
+          {/* First-time user hint that disappears after 5 seconds */}
+          {showHint && (
+            <div className="absolute top-full left-0 mt-2 bg-yellow-500 text-black text-sm py-1 px-3 rounded-md shadow-lg animate-bounce whitespace-nowrap z-50">
+              Click the logo to open menu
+              <div className="absolute -top-2 left-4 w-0 h-0 border-l-8 border-r-8 border-b-8 border-l-transparent border-r-transparent border-b-yellow-500"></div>
+            </div>
+          )}
         </div>
 
         {/* Mobile Controls */}
         <div className="flex md:hidden items-center space-x-4">
-          <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="text-white">
-            {isMobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
+          <button
+            onClick={triggerSidebarOpen}
+            className="md:hidden flex items-center justify-center p-2 rounded-md text-yellow-500 hover:bg-yellow-500/10 transition-colors"
+            aria-label="Open menu"
+          >
+            {" "}
+            <Menu className="h-6 w-6" />
           </button>
 
           {authenticated && (
@@ -192,29 +231,34 @@ const Navbar = ({ authenticated }) => {
               <Link to="/resto/2/menu" className="text-white hover:text-yellow-500 transition">
                 Menu
               </Link>
-              <Link to="/reservation" className="text-white hover:text-yellow-500 transition">
+              {/* <Link to="/reservation" className="text-white hover:text-yellow-500 transition">
                 Reservations
-              </Link>
+              </Link> */}
               <Link to="/tips" className="text-white hover:text-yellow-500 transition">
                 Tips
               </Link>
               <Link to="/scan" className="text-white hover:text-yellow-500 transition">
                 Scan QR
               </Link>
-              <Link to="/favorites" className="text-white hover:text-yellow-500 transition">
+              {/* <Link to="/favorites" className="text-white hover:text-yellow-500 transition">
                 Favorites
-              </Link>
+              </Link> */}
               <Link to="/mealCalendar" className="text-white hover:text-yellow-500">
                 Meal Calendar
               </Link>
               <Link to="/orderHistory" className="text-white hover:text-yellow-500">
                 Order History
               </Link>
-              <Link to="/meteo" className="text-white hover:text-yellow-500">
+              {/* <Link to="/meteo" className="text-white hover:text-yellow-500">
                 Weather Recommendations
+              </Link> */}
+              <Link to="/analyzer" className="text-white hover:text-yellow-500">
+                Food Analyzer
+              </Link>
+              <Link to="/cultural-story" className="text-white hover:text-yellow-500">
+                Cultural Story
               </Link>
               <ActiveGroupOrdersButton />
-
             </>
           )}
         </div>
@@ -223,10 +267,6 @@ const Navbar = ({ authenticated }) => {
         <div className="hidden md:flex items-center space-x-6">
           {/* Support Chat Button */}
           {authenticated && (
-            // <button
-            //   onClick={() => document.dispatchEvent(new CustomEvent("toggle-chat-support"))}
-            //   className="flex items-center gap-2 px-4 py-2 text-white hover:text-yellow-500 transition-colors"
-            // >
             <Link
               to="/contact"
               className="flex items-center gap-2 px-4 py-2 text-white hover:text-yellow-500 transition-colors"
@@ -234,7 +274,6 @@ const Navbar = ({ authenticated }) => {
               <MessageSquare className="h-5 w-5" />
               <span>Support</span>
             </Link>
-            // </button>
           )}
           {authenticated && (
             <>
@@ -406,8 +445,6 @@ const Navbar = ({ authenticated }) => {
                   </div>
                 )}
               </div>
-
-             
 
               <div className="relative">
                 <button
@@ -638,7 +675,6 @@ const Navbar = ({ authenticated }) => {
           </div>
         )}
       </nav>
-      {/* Chat Support Widget */}
     </>
   )
 }

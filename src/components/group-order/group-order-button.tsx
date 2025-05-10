@@ -1,4 +1,4 @@
-"use client"
+
 
 import { useState } from "react"
 import { Users, Plus } from "lucide-react"

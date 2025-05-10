@@ -42,6 +42,11 @@ import Dashboard from "./pages/dahsboard"; // en haut du fichier
 import VoiceMenu from './pages/VoiceMenu';
 import WhatsAppContactPage from "./pages/contact";
 import GroupOrderPage from "./app/group-order/[code]/page";
+import ChatSupport from "./components/chat-support"
+import NutritionAnalyzerPage from "./pages/NutritionAnalyzerPage";
+import CulturalStoriesPage from "./pages/CulturalStoriesPage";
+
+import EnhancedSidebar from "./components/EnhancedSidebar"
 
 
 import { useState } from "react"; // en haut du fichier
@@ -63,6 +68,8 @@ const App = () => {
     "/code",
     "/resetpwd"
   ];
+    const showSidebar = authenticated && !hiddenNavbarRoutes.includes(location.pathname)
+
 
   return (
     <GoogleOAuthProvider clientId="361184163851-pve81gsol6s8uuqr0hijoqjgi9gib0jc.apps.googleusercontent.com">
@@ -73,6 +80,9 @@ const App = () => {
           boxShadow: "inset 0 0 0 2000px rgba(0, 0, 0, 0.5)",
         }}
       >
+          {/* Enhanced Sidebar */}
+        {showSidebar && <EnhancedSidebar authenticated={authenticated} />}
+
         {!hiddenNavbarRoutes.includes(location.pathname) && (
           <Navbar authenticated={authenticated} />
         )}
@@ -115,6 +125,8 @@ const App = () => {
           <Route path="/mood" element={authenticated ? <Mood /> : <Navigate to="/" />} />
           <Route path="/dashboard" element={authenticated ? <Dashboard /> : <Navigate to="/" />} />
           <Route path="/voice-menu" element={authenticated ? <VoiceMenu /> : <Navigate to="/" />} />
+          <Route path="/analyzer" element={authenticated ? <NutritionAnalyzerPage /> : <Navigate to="/" />} />
+          <Route path="/cultural-story" element={authenticated ? <CulturalStoriesPage /> : <Navigate to="/" />} />
           <Route path="/group-order/:code" element={authenticated ? <GroupOrderPage /> : <Navigate to="/" />} />
 
 
@@ -166,6 +178,7 @@ const App = () => {
 
             {/* Chatbot et support */}
             {showChatBot && <ChatBot />}
+            {<ChatSupport />}
 
             {/* 🎤 Commande vocale + résultats */}
            {/* <div className="p-4 max-w-3xl mx-auto">

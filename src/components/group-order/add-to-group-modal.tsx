@@ -1,4 +1,4 @@
-"use client"
+
 
 import { useState, useEffect } from "react"
 import { X, Users, ShoppingBag, Plus, ShoppingCart } from "lucide-react"
