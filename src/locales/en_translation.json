@@ -1,0 +1,47 @@
+{
+    "blogTips": {
+    "title": "Healthy Eating Tips",
+    "loading": "Loading...",
+    "error": "Failed to load tips. Please try again later.",
+    "noTips": "No tips available.",
+    "date": "Published on"
+  }
+  ,
+    "reservation": {
+    "title": "Make a Reservation",
+    "email": "Email",
+    "date": "Date",
+    "time": "Time",
+    "guests": "Guests",
+    "requests": "Special Requests",
+    "requestsPlaceholder": "Any special instructions?",
+    "submit": "Submit Reservation",
+    "userNotFound": "User not found in localStorage.",
+    "missingUserId": "User ID is missing. Please log in again.",
+    "success": "Reservation successfully added! A confirmation email has been sent.",
+    "error": "Error:"
+  },
+  
+    "settingss": {
+      "dark_mode": "Dark Mode",
+      "notifications": "Notifications",
+      "language": "Language",
+      "save": "Save Settings",
+      "Settings": "Settings"
+    },
+    "categories": {
+      "starters": "Starters",
+      "mains": "Mains",
+      "desserts": "Desserts",
+      "mostPurchased": "Most Purchased"
+    },
+    "search": "Search",
+    "add": "Add",
+    "addedToCart": "Added to Cart!",
+    "alreadyInCart": "Already in Cart",
+    "alreadyInFavorites": "{{item}} is already in favorites!",
+    "addedToFavorites": "Added to favorites: {{item}}",
+    "purchased": "Purchased {{count}}×"
+    
+  }
+  
