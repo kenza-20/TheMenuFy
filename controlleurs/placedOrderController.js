@@ -67,3 +67,14 @@ exports.getOrderHistory = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch order history" })
   }
 }
+
+exports.getAllOrders = async (req, res) => {
+  try {
+    const orders = await PlacedOrder.find().sort({ createdAt: -1 });
+    res.status(200).json(orders);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Failed to fetch all orders" });
+  }
+};
+

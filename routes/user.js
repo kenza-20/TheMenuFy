@@ -55,11 +55,13 @@ router.get("/confirm/:id", async (req, res) => {
         res.status(500).json({ error: "Something went wrong" });
     }
 });
+router.get('/users', userController.getAllUsers);
 
 // Route pour mettre à jour le profil de l'utilisateur
 router.put('/update-profile', upload.single('image'), userController.updateMonProfil);
 router.get('/bytoken', userController.getByToken);
 // Reservation routes
+router.get('/getAllReservation', userController.getAllReservation);
 router.post('/reservations', userController.addReservation);
 router.get('/get-user/:userId', userController.getUserById);
 router.get('/reservations/:userId', userController.getReservationsByUser);

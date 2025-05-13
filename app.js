@@ -29,7 +29,8 @@ const culturalStory = require('./routes/culturalStory');
 const narrativeRoutes = require('./routes/narrativeRoutes');
 const cultureRoutes = require('./routes/cultureRoutes');
 const aiOrderRoutes = require('./routes/aiOrderRoutes');
-
+const nutritionRoutes = require('./routes/nutritionRoutes');
+const imageRoutes = require("./routes/imageRoutes");
 // Middleware
 app.use(cors({
     origin: '*',  // URL de ton frontend
@@ -61,7 +62,8 @@ app.use('/api/cultural-story', culturalStory);
 app.use('/api/narrative', narrativeRoutes);
 app.use('/api/culture', cultureRoutes);
 app.use('/api/ai-order', aiOrderRoutes);
-
+app.use('/api/nutrition', nutritionRoutes);
+app.use("/api", imageRoutes);
 app.post('/webhook', (req, res) => {
   console.log("Requête reçue de Dialogflow :", req.body);
   res.json({ fulfillmentText: "Commande bien reçue !" });

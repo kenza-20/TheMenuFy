@@ -407,6 +407,15 @@ const getUserById = async (req, res) => {
   }
 };
 
+const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find().select('-password -__v'); // exclure password et __v pour des raisons de sécurité
+    res.status(200).json(users);
+  } catch (error) {
+    console.error("Erreur lors de la récupération des utilisateurs:", error);
+    res.status(500).json({ message: "Erreur serveur lors de la récupération des utilisateurs." });
+  }
+};
 
 
 const addReservation = async (req, res) => {
@@ -479,6 +488,18 @@ const getReservationById = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+const getAllReservation = async (req, res) => {
+  try {
+    const reservations = await Reservation.find().sort({ createdAt: -1 });
+    res.status(200).json(reservations);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Failed to fetch all reservations" });
+  }
+};
+
+
 
 const getFriendsRecommendations = async (req, res) => {
   try {
@@ -1003,6 +1024,8 @@ module.exports = {
   removeFromFavorites,
   getUserFavorites,
   checkFavorite,
-  getUserById
+  getUserById,
+  getAllUsers,
+  getAllReservation
 };
 
