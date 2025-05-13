@@ -34,7 +34,8 @@ import MealCalendar from "./pages/MealCalendar";
 import OrderHistory from "./pages/OrderHistory";
 import ChatBot from './ChatBot';
 import { useState } from "react";
-import Dashboard from "./pages/dashboard"; // en haut du fichier
+import Dashboard from "./pages/dashboard";
+import ComposeAssiette from "./pages/ComposeAssiette";
 
 const App = () => {
   const location = useLocation();
@@ -99,6 +100,8 @@ const App = () => {
           <Route path="/favorites" element={authenticated ? <Favorites /> : <Navigate to="/" />} />
           <Route path="/tips" element={<BlogTips />} />
           <Route path="/dashboard" element={authenticated ? <Dashboard /> : <Navigate to="/" />} />
+          <Route path="/IA" element={authenticated ? <ComposeAssiette /> : <Navigate to="/" />} />
+
 
 
           {/* Admin protected routes */}
@@ -149,7 +152,7 @@ const App = () => {
 )}
           </div>
 
-      
+
     </GoogleOAuthProvider>
   );
 };
