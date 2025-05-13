@@ -16,6 +16,14 @@ const ingredientSchema = new mongoose.Schema({
   carbs: {
     type: Number,
     required: true
+  },
+  protein: {
+    type: Number,
+
+  },
+  fat: {
+    type: Number,
+
   }
 }, { _id: false });
 

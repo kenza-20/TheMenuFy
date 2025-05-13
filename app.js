@@ -21,6 +21,8 @@ const favoritesRoutes = require('./routes/favorites');
 const orderRoutes = require('./routes/orderRoutes');
 const tipRoutes = require('./routes/tipRoutes');
 const placedOrdersRoutes = require('./routes/placedOrdersRoutes');
+const nutritionRoutes = require('./routes/nutritionRoutes');
+const imageRoutes = require("./routes/imageRoutes");
 
 // Middleware
 app.use(cors({
@@ -45,6 +47,8 @@ app.use('/api/orders', orderRoutes);
 app.use('/api', tipRoutes);
 app.use('/api/placedOrders', placedOrdersRoutes);
 app.use("/api/chat", chatRoute);
+app.use('/api/nutrition', nutritionRoutes);
+app.use("/api", imageRoutes);
 
 
 
