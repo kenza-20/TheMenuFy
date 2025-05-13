@@ -50,9 +50,10 @@ import CultureQuiz from './pages/CultureQuiz';
 import AIOrderPage from "./pages/AIOrderPage"
 
 import EnhancedSidebar from "./components/EnhancedSidebar"
+import ComposeAssiette from "./pages/ComposeAssiette";
 
-
-import { useState } from "react"; // en haut du fichier
+import { useState } from "react";
+import Static from "./pages/static";
 
 const App = () => {
   const location = useLocation();
@@ -130,7 +131,9 @@ const App = () => {
           <Route path="/voice-menu" element={authenticated ? <VoiceMenu /> : <Navigate to="/" />} />
           <Route path="/analyzer" element={authenticated ? <NutritionAnalyzerPage /> : <Navigate to="/" />} />
           <Route path="/cultural-story" element={authenticated ? <CulturalStoriesPage /> : <Navigate to="/" />} />
-          <Route path="/group-order/:code" element={authenticated ? <GroupOrderPage /> : <Navigate to="/" />} />
+          <Route path="/compose" element={authenticated ? <ComposeAssiette /> : <Navigate to="/" />} />
+            <Route path="/stat" element={authenticated ? <Static /> : <Navigate to="/" />} />
+            <Route path="/group-order/:code" element={authenticated ? <GroupOrderPage /> : <Navigate to="/" />} />
 <Route path="/interactive-story" element={<InteractiveStory />} />
 <Route path="/culture/:country" element={<CultureQuiz />} />
 <Route path="/ai-order" element={<AIOrderPage />} />

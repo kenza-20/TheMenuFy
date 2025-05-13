@@ -453,39 +453,6 @@ const Navbar = ({ authenticated }) => {
                 )}
               </div>
 
-              <div className="relative">
-                <button
-                  onClick={toggleProfile}
-                  className="w-9 h-9 flex items-center justify-center bg-gray-200 rounded-full hover:ring-2 hover:ring-yellow-500 transition"
-                >
-                  <User className="text-gray-700" size={20} />
-                </button>
-                {isProfileOpen && (
-                  <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-lg py-2 text-black z-50">
-                    <Link to="/ProfilePage" onClick={toggleProfile} className="block px-4 py-2 hover:text-yellow-500">
-                      Profile
-                    </Link>
-                    <Link to="/favorites" onClick={toggleProfile} className="block px-4 py-2 hover:text-yellow-500">
-                      Favorites
-                    </Link>
-                    <Link to="/Cart" onClick={toggleProfile} className="block px-4 py-2 hover:text-yellow-500">
-                      Cart
-                    </Link>
-                    <Link to="/settings" onClick={toggleProfile} className="block px-4 py-2 hover:text-yellow-500">
-                      Settings
-                    </Link>
-                    <button
-                      onClick={() => {
-                        handleLogout()
-                        toggleProfile()
-                      }}
-                      className="block w-full text-left px-4 py-2 hover:text-yellow-500"
-                    >
-                      Logout
-                    </button>
-                  </div>
-                )}
-              </div>
             </>
           )}
         </div>

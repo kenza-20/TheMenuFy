@@ -127,6 +127,7 @@ const EnhancedSidebar = ({ authenticated} :any) => {
       title: "Analysis",
       items: [
         { title: "Dashboard", path: "/dashboard", icon: BarChart },
+        { title: "Compose dish", path: "/compose", icon: Utensils },
         { title: "Nutrition Analyzer", path: "/analyzer", icon: BookOpen },
         { title: "Cultural Stories", path: "/cultural-story", icon: BookOpen },
       ],
@@ -138,6 +139,13 @@ const EnhancedSidebar = ({ authenticated} :any) => {
         { title: "Weather Meals", path: "/meteo", icon: Cloud },
         { title: "Mood Meals", path: "/mood", icon: Smile },
         { title: "Voice Menu", path: "/voice-menu", icon: Coffee },
+      ],
+    },
+    {
+      title: "Statistiques",
+      items: [
+        { title: "Static", path: "/stat", icon: BarChart },
+
       ],
     }
   ]
