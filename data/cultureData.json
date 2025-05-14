@@ -1,0 +1,131 @@
+{
+  "Japan": {
+    "info": "La cuisine japonaise, classée au patrimoine mondial, met en avant des ingrédients frais, la saisonnalité et l’esthétique des plats.",
+    "quiz": [
+      {
+        "question": "Quel ingrédient est essentiel dans les sushis ?",
+        "options": ["Pain", "Riz", "Tofu", "Pâtes"],
+        "answer": "Riz"
+      },
+      {
+        "question": "Quel est le bouillon traditionnel japonais ?",
+        "options": ["Pho", "Miso", "Ramen", "Bouillabaisse"],
+        "answer": "Miso"
+      },
+      {
+        "question": "Quel dessert japonais est souvent préparé avec du riz gluant ?",
+        "options": ["Mochi", "Tiramisu", "Gâteau au chocolat", "Pudding"],
+        "answer": "Mochi"
+      },
+      {
+        "question": "Quel plat est souvent servi dans une boîte bento ?",
+        "options": ["Ramen", "Sashimi", "Tempura", "Tous"],
+        "answer": "Tous"
+      }
+    ]
+  },
+
+  "Italy": {
+    "info": "La cuisine italienne est célèbre pour sa simplicité, ses pâtes fraîches, ses fromages raffinés et sa passion du goût.",
+    "quiz": [
+      {
+        "question": "Quel fromage est souvent utilisé sur la pizza ?",
+        "options": ["Brie", "Roquefort", "Mozzarella", "Cheddar"],
+        "answer": "Mozzarella"
+      },
+      {
+        "question": "Quelle herbe est typique de la cuisine italienne ?",
+        "options": ["Coriandre", "Basilic", "Menthe", "Curry"],
+        "answer": "Basilic"
+      },
+      {
+        "question": "Quel dessert est typiquement italien ?",
+        "options": ["Tiramisu", "Mousse au chocolat", "Crème brûlée", "Baklava"],
+        "answer": "Tiramisu"
+      },
+      {
+        "question": "Quel plat est originaire de Bologne ?",
+        "options": ["Pizza", "Lasagnes", "Spaghetti Bolognese", "Risotto"],
+        "answer": "Spaghetti Bolognese"
+      }
+    ]
+  },
+
+  "United States": {
+    "info": "La cuisine américaine est diverse, influencée par des cultures du monde entier, avec une préférence pour les portions généreuses et les plats rapides.",
+    "quiz": [
+      {
+        "question": "Quel plat est typiquement associé aux fast-foods américains ?",
+        "options": ["Sushi", "Hamburger", "Tacos", "Quiche"],
+        "answer": "Hamburger"
+      },
+      {
+        "question": "Quel dessert américain est souvent servi pendant Thanksgiving ?",
+        "options": ["Apple Pie", "Tiramisu", "Cheesecake", "Brownie"],
+        "answer": "Apple Pie"
+      },
+      {
+        "question": "Quelle boisson est souvent consommée dans les diners américains ?",
+        "options": ["Thé vert", "Milkshake", "Jus de betterave", "Vin rouge"],
+        "answer": "Milkshake"
+      },
+      {
+        "question": "Quel sandwich à base de bacon, laitue et tomate est populaire ?",
+        "options": ["BLT", "Club", "Panini", "Croque-Monsieur"],
+        "answer": "BLT"
+      }
+    ]
+  },
+
+  "France": {
+    "info": "La cuisine française est renommée pour sa finesse, ses techniques culinaires, ses sauces et ses pâtisseries emblématiques.",
+    "quiz": [
+      {
+        "question": "Quel fromage français a une croûte blanche ?",
+        "options": ["Camembert", "Roquefort", "Comté", "Reblochon"],
+        "answer": "Camembert"
+      },
+      {
+        "question": "Quel est le plat emblématique de la Bourgogne ?",
+        "options": ["Bœuf Bourguignon", "Cassoulet", "Bouillabaisse", "Ratatouille"],
+        "answer": "Bœuf Bourguignon"
+      },
+      {
+        "question": "Quel dessert est souvent caramélisé sur le dessus ?",
+        "options": ["Crème brûlée", "Tarte Tatin", "Mille-feuille", "Opéra"],
+        "answer": "Crème brûlée"
+      },
+      {
+        "question": "Quelle soupe est faite avec des oignons caramélisés et du fromage ?",
+        "options": ["Soupe de légumes", "Soupe à l’oignon", "Bisque", "Velouté"],
+        "answer": "Soupe à l’oignon"
+      }
+    ]
+  },
+
+  "Mexico": {
+    "info": "La cuisine mexicaine, riche en couleurs et en saveurs, mélange traditions indigènes et influences espagnoles.",
+    "quiz": [
+      {
+        "question": "Quelle sauce piquante est utilisée dans de nombreux plats mexicains ?",
+        "options": ["Salsa", "Pesto", "Mayonnaise", "Ketchup"],
+        "answer": "Salsa"
+      },
+      {
+        "question": "Quel aliment de base est utilisé dans les tortillas ?",
+        "options": ["Riz", "Blé", "Maïs", "Pomme de terre"],
+        "answer": "Maïs"
+      },
+      {
+        "question": "Quel plat mexicain est souvent farci et frit ?",
+        "options": ["Taco", "Quesadilla", "Empanada", "Burrito"],
+        "answer": "Empanada"
+      },
+      {
+        "question": "Quel dessert mexicain est un gâteau trempé dans trois types de lait ?",
+        "options": ["Flan", "Tres Leches", "Churros", "Brownie"],
+        "answer": "Tres Leches"
+      }
+    ]
+  }
+}
