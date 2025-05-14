@@ -579,20 +579,21 @@ const Menu = () => {
                             <FaHeart size={16} />
                           </button>
                         </div>
+                        {item.origin && (
+                            <button
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  navigate(`/culture/${item.origin}`)
+                                }}
+                                className="mt-4 px-4 py-2 text-sm font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg transition-all w-fit mx-auto"
+                            >
+                              🌍 Relevez le défi culturel
+                            </button>
+                        )}
+
                       </div>
 
 
-                      {item.origin && (
-  <button
-    onClick={(e) => {
-      e.stopPropagation()
-      navigate(`/culture/${item.origin}`)
-    }}
-    className="mt-4 px-4 py-2 text-sm font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg transition-all w-fit mx-auto"
-  >
-    🌍 Relevez le défi culturel
-  </button>
-)}
 
 
                     </div>
