@@ -2,6 +2,7 @@
 const mongoose = require('mongoose');
 
 const mealSchema = new mongoose.Schema({
+  userId: { type: String, required: true },
   name: { type: String, required: true },
   mealType: { type: String, enum: ['breakfast', 'elevenses', 'lunch', 'dinner', 'snack'], required: true },
   calories: { type: Number, required: true },

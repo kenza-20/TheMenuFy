@@ -80,3 +80,457 @@ router.get('/level/:userId',userController.getOrderCountAndLoyaltyLevel);
 
 
 module.exports = router;
+
+
+/**
+ * @swagger
+ * components:
+ *   securitySchemes:
+ *     bearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
+ *   schemas:
+ *     User:
+ *       type: object
+ *       required:
+ *         - name
+ *         - surname
+ *         - email
+ *         - password
+ *         - role
+ *         - tel
+ *       properties:
+ *         name:
+ *           type: string
+ *         surname:
+ *           type: string
+ *         email:
+ *           type: string
+ *           format: email
+ *         password:
+ *           type: string
+ *           format: password
+ *         role:
+ *           type: string
+ *           enum: [user, restaurant]
+ *         tel:
+ *           type: string
+ *         approved:
+ *           type: boolean
+ *         confirmed:
+ *           type: boolean
+ *         image:
+ *           type: string
+ *         foodLikes:
+ *           type: string
+ *         foodHates:
+ *           type: string
+ *         allergies:
+ *           type: array
+ *           items:
+ *             type: string
+ *         neighborhood:
+ *           type: string
+ * 
+ *     Reservation:
+ *       type: object
+ *       properties:
+ *         date:
+ *           type: string
+ *           format: date-time
+ *         time:
+ *           type: string
+ *         numberOfGuests:
+ *           type: integer
+ *         specialRequests:
+ *           type: string
+ * 
+ *     PasswordReset:
+ *       type: object
+ *       properties:
+ *         token:
+ *           type: string
+ *         newPassword:
+ *           type: string
+ * 
+ *     Recommendation:
+ *       type: object
+ *       properties:
+ *         id_dish:
+ *           type: string
+ *         name:
+ *           type: string
+ *         image:
+ *           type: string
+ *         description:
+ *           type: string
+ *         count:
+ *           type: integer
+
+ * tags:
+ *   - name: Users
+ *     description: Gestion des utilisateurs
+ *   - name: Reservations
+ *     description: Gestion des réservations
+ *   - name: Favorites
+ *     description: Gestion des favoris
+
+ * paths:
+ *   /user/signup:
+ *     post:
+ *       summary: Inscription d'un nouvel utilisateur
+ *       tags: [Users]
+ *       requestBody:
+ *         required: true
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       responses:
+ *         201:
+ *           description: Utilisateur créé avec succès
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: object
+ *                 properties:
+ *                   message:
+ *                     type: string
+ *                   token:
+ *                     type: string
+ *                   userId:
+ *                     type: string
+ *                   role:
+ *                     type: string
+ *         400:
+ *           description: Données invalides ou validation échouée
+ * 
+ *   /user/login:
+ *     post:
+ *       summary: Connexion utilisateur
+ *       tags: [Users]
+ *       requestBody:
+ *         required: true
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 email:
+ *                   type: string
+ *                 password:
+ *                   type: string
+ *       responses:
+ *         200:
+ *           description: Connexion réussie
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: object
+ *                 properties:
+ *                   message:
+ *                     type: string
+ *                   token:
+ *                     type: string
+ *                   user:
+ *                     $ref: '#/components/schemas/User'
+ *         401:
+ *           description: Authentification échouée
+ * 
+ *   /user/logout:
+ *     post:
+ *       summary: Déconnexion utilisateur
+ *       tags: [Users]
+ *       security:
+ *         - bearerAuth: []
+ *       responses:
+ *         200:
+ *           description: Déconnexion réussie
+ * 
+ *   /user/forgot-password:
+ *     post:
+ *       summary: Demande de réinitialisation de mot de passe
+ *       tags: [Users]
+ *       requestBody:
+ *         required: true
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 email:
+ *                   type: string
+ *       responses:
+ *         200:
+ *           description: Email de réinitialisation envoyé
+ *         404:
+ *           description: Email non trouvé
+ * 
+ *   /user/reset-password:
+ *     post:
+ *       summary: Réinitialisation du mot de passe
+ *       tags: [Users]
+ *       requestBody:
+ *         required: true
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/PasswordReset'
+ *       responses:
+ *         200:
+ *           description: Mot de passe modifié avec succès
+ *         400:
+ *           description: Code invalide ou expiré
+ * 
+ *   /user/confirm/{id}:
+ *     get:
+ *       summary: Confirmation d'email
+ *       tags: [Users]
+ *       parameters:
+ *         - in: path
+ *           name: id
+ *           schema:
+ *             type: string
+ *           required: true
+ *       responses:
+ *         200:
+ *           description: Email confirmé avec succès
+ *           content:
+ *             text/html:
+ *               schema:
+ *                 type: string
+ *         400:
+ *           description: Lien de confirmation invalide
+ * 
+ *   /user/users:
+ *     get:
+ *       summary: Liste tous les utilisateurs
+ *       tags: [Users]
+ *       security:
+ *         - bearerAuth: []
+ *       responses:
+ *         200:
+ *           description: Liste des utilisateurs
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: array
+ *                 items:
+ *                   $ref: '#/components/schemas/User'
+ * 
+ *   /user/update-profile:
+ *     put:
+ *       summary: Mise à jour du profil utilisateur
+ *       tags: [Users]
+ *       security:
+ *         - bearerAuth: []
+ *       consumes:
+ *         - multipart/form-data
+ *       requestBody:
+ *         content:
+ *           multipart/form-data:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 image:
+ *                   type: string
+ *                   format: binary
+ *                 name:
+ *                   type: string
+ *                 surname:
+ *                   type: string
+ *                 email:
+ *                   type: string
+ *                 tel:
+ *                   type: string
+ *       responses:
+ *         200:
+ *           description: Profil mis à jour
+ * 
+ *   /user/bytoken:
+ *     get:
+ *       summary: Récupère l'utilisateur par token
+ *       tags: [Users]
+ *       security:
+ *         - bearerAuth: []
+ *       responses:
+ *         200:
+ *           description: Informations utilisateur
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/User'
+ * 
+ *   /user/getAllReservation:
+ *     get:
+ *       summary: Liste tous les reservation
+ *       tags: [Reservations]
+ *       security:
+ *         - bearerAuth: []
+ *       responses:
+ *         200:
+ *           description: Liste des reservation
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: array
+ *                 items:
+ *                   $ref: '#/components/schemas/Reservation'
+ * 
+ * 
+ *   /user/reservations:
+ *     post:
+ *       summary: Ajoute une réservation
+ *       tags: [Reservations]
+ *       security:
+ *         - bearerAuth: []
+ *       requestBody:
+ *         required: true
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Reservation'
+ *       responses:
+ *         201:
+ *           description: Réservation créée
+ * 
+ *   /user/get-user/{userId}:
+ *     get:
+ *       summary: Récupère un utilisateur par ID
+ *       tags: [Users]
+ *       parameters:
+ *         - in: path
+ *           name: userId
+ *           schema:
+ *             type: string
+ *           required: true
+ *       responses:
+ *         200:
+ *           description: Détails de l'utilisateur
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/User'
+ * 
+ *   /user/reservations/{userId}:
+ *     get:
+ *       summary: Récupère les réservations d'un utilisateur
+ *       tags: [Reservations]
+ *       parameters:
+ *         - in: path
+ *           name: userId
+ *           schema:
+ *             type: string
+ *           required: true
+ *       responses:
+ *         200:
+ *           description: Liste des réservations
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: array
+ *                 items:
+ *                   $ref: '#/components/schemas/Reservation'
+ * 
+ *   /user/behavioral-recommendations/{userId}:
+ *     get:
+ *       summary: Recommandations personnalisées
+ *       tags: [Users]
+ *       parameters:
+ *         - in: path
+ *           name: userId
+ *           schema:
+ *             type: string
+ *           required: true
+ *       responses:
+ *         200:
+ *           description: Liste des recommandations
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: array
+ *                 items:
+ *                   $ref: '#/components/schemas/Recommendation'
+ * 
+ *   /user/shared-recommendations/{userId}:
+ *     get:
+ *       summary: Recommandations partagées
+ *       tags: [Users]
+ *       parameters:
+ *         - in: path
+ *           name: userId
+ *           schema:
+ *             type: string
+ *           required: true
+ *       responses:
+ *         200:
+ *           description: Liste des recommandations
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: array
+ *                 items:
+ *                   $ref: '#/components/schemas/Recommendation'
+ * 
+ *   /user/level/{userId}:
+ *     get:
+ *       summary: Niveau de fidélité
+ *       tags: [Users]
+ *       parameters:
+ *         - in: path
+ *           name: userId
+ *           schema:
+ *             type: string
+ *           required: true
+ *       responses:
+ *         200:
+ *           description: Niveau de fidélité et nombre de commandes
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: object
+ *                 properties:
+ *                   orderCount:
+ *                     type: integer
+ *                   loyaltyLevel:
+ *                     type: string
+ * 
+ *   /user/favorites/add:
+ *     post:
+ *       summary: Ajouter aux favoris
+ *       tags: [Favorites]
+ *       requestBody:
+ *         required: true
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 userId:
+ *                   type: string
+ *                 dishId:
+ *                   type: string
+ *       responses:
+ *         200:
+ *           description: Ajouté aux favoris
+ * 
+ *   /user/favorites/remove:
+ *     post:
+ *       summary: Retirer des favoris
+ *       tags: [Favorites]
+ *       requestBody:
+ *         required: true
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 userId:
+ *                   type: string
+ *                 dishId:
+ *                   type: string
+ *       responses:
+ *         200:
+ *           description: Retiré des favoris
+ */

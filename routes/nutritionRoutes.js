@@ -40,3 +40,99 @@ router.post('/nutrition', async (req, res) => {
 });
 
 module.exports = router;
+
+
+
+/**
+ * @swagger
+ * tags:
+ *   name: Ingredients
+ *   description: Gestion des ingrédients et de la nutrition des recettes
+ * 
+ * components:
+ *   schemas:
+ *     Ingredient:
+ *       type: object
+ *       properties:
+ *         name:
+ *           type: string
+ *         calories:
+ *           type: number
+ *         protein:
+ *           type: number
+ *         carbs:
+ *           type: number
+ *         fat:
+ *           type: number
+ * 
+ *     NutritionData:
+ *       type: object
+ *       properties:
+ *         calories:
+ *           type: number
+ *         protein:
+ *           type: number
+ *         carbs:
+ *           type: number
+ *         fat:
+ *           type: number
+ * 
+ *     IngredientArray:
+ *       type: array
+ *       items:
+ *         $ref: '#/components/schemas/Ingredient'
+ * 
+ * paths:
+ *   /nutrition/ingredients:
+ *     get:
+ *       summary: Récupère tous les ingrédients uniques depuis les recettes
+ *       tags: [Ingredients]
+ *       responses:
+ *         200:
+ *           description: Liste des ingrédients uniques
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/IngredientArray'
+ *         500:
+ *           description: Erreur interne du serveur
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: object
+ *                 properties:
+ *                   error:
+ *                     type: string
+ * 
+ *   /nutrition/nutrition:
+ *     post:
+ *       summary: Calculer la nutrition pour une liste d'ingrédients
+ *       tags: [Ingredients]
+ *       requestBody:
+ *         required: true
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 foodItems:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *       responses:
+ *         200:
+ *           description: Données nutritionnelles calculées
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/NutritionData'
+ *         500:
+ *           description: Erreur interne du serveur
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: object
+ *                 properties:
+ *                   error:
+ *                     type: string
+ */

@@ -5,6 +5,8 @@ const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const app = express();
 const port = 3000;
+const swaggerJsdoc = require('swagger-jsdoc');
+const swaggerUi = require('swagger-ui-express');
 
 const chatRoute = require("./routes/chat");
 const notificationRoutes = require('./routes/notificationRoute');
@@ -68,6 +70,38 @@ app.post('/webhook', (req, res) => {
   console.log("Requête reçue de Dialogflow :", req.body);
   res.json({ fulfillmentText: "Commande bien reçue !" });
 });
+
+
+
+// Configuration Swagger
+const options = {
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'API Nutrition',
+      version: '1.0.0',
+      description: 'Documentation de l\'API Nutrition',
+    },
+    servers: [
+      { url: 'http://localhost:3000/api' }
+    ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT'
+        }
+      }
+    }
+  },
+  apis: ['./routes/*.js'], // Chemin vers vos fichiers de routes
+};
+
+const specs = swaggerJsdoc(options);
+
+// Route pour la documentation
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 
 
     // Lancement du serveur

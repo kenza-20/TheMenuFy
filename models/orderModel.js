@@ -1,9 +1,11 @@
 const mongoose = require('mongoose');
 
 const orderSchema = new mongoose.Schema({
-  id_user: { type: String, required: true },  // User ID who placed the order
-  tableId: { type: String, required: true },  // Table ID where the order was placed
-  orderedAt: { type: Date, default: Date.now }, // When the order was placed
+
+  id_user: { type: String, required: true },
+  orderedAt: { type: Date, default: Date.now },
+  tableNumber: { type: Number },
+
 
   name: { type: String, required: true },     // Dish name
   description: { type: String, required: true },  // Dish description
