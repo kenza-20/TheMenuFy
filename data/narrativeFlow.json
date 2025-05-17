@@ -1,0 +1,99 @@
+{
+  "start": {
+    "id": "start",
+    "text": "Tu ouvres les yeux dans une cuisine flottante suspendue dans les nuages. Tout est calme, sauf une radio qui grésille doucement sur une fréquence étrange...",
+    "choices": [
+      { "label": "Approcher la radio", "next": "radio" },
+      { "label": "Observer la fenêtre", "next": "fenetre" },
+      { "label": "Explorer les tiroirs", "next": "tiroirs" }
+    ]
+  },
+
+  "radio": {
+    "id": "radio",
+    "text": "Une voix mécanique s'échappe : 'Bienvenue au défi du chef céleste.' Un bouton rouge clignote sous l'appareil...",
+    "choices": [
+      { "label": "Appuyer sur le bouton", "next": "button" },
+      { "label": "Ignorer et couper la radio", "next": "ignoreRadio" }
+    ]
+  },
+
+  "fenetre": {
+    "id": "fenetre",
+    "text": "Par la fenêtre, tu vois un champ de spaghettis géants danser dans le vent. Une trappe s'ouvre au sol sous tes pieds...",
+    "choices": [
+      { "label": "Sauter dans la trappe", "next": "trappe" },
+      { "label": "Retourner vers la cuisine", "next": "radio" }
+    ]
+  },
+
+  "tiroirs": {
+    "id": "tiroirs",
+    "text": "Tu ouvres un tiroir. Une voix sort d'une cuillère dorée : 'Seuls les vrais gourmets survivront ici.' Elle chauffe dans ta main...",
+    "choices": [
+      { "label": "Parler à la cuillère", "next": "cuillere" },
+      { "label": "La jeter", "next": "jeterCuillere" }
+    ]
+  },
+
+  "button": {
+    "id": "button",
+    "text": "Un hologramme de chef étoilé apparaît : 'Prépare le plat ultime. Choisis bien ton ingrédient de départ.' Trois ingrédients flottent : mangue, moutarde, champignon.",
+    "choices": [
+      { "label": "Mangue", "next": "mangue" },
+      { "label": "Moutarde", "next": "moutarde" },
+      { "label": "Champignon", "next": "champignon" }
+    ]
+  },
+
+  "ignoreRadio": {
+    "id": "ignoreRadio",
+    "text": "Tu coupes la radio, mais le silence devient pesant. Une porte s'ouvre d'elle-même derrière toi. Tu sens un parfum de truffe et d'ananas.",
+    "choices": [
+      { "label": "Entrer dans la pièce", "next": "chambrePlats" },
+      { "label": "Rester dans la cuisine", "next": "tiroirs" }
+    ]
+  },
+
+  "trappe": {
+    "id": "trappe",
+    "text": "Tu tombes dans un garde-manger infini rempli d'épices flottantes. Une lumière verte te guide vers une sortie au fond...",
+    "end": true
+  },
+
+  "cuillere": {
+    "id": "cuillere",
+    "text": "La cuillère dit : 'Tu as été choisi. Chaque goût est un chemin.' Elle se transforme en fourchette dorée et t'indique un tiroir secret.",
+    "end": true
+  },
+
+  "jeterCuillere": {
+    "id": "jeterCuillere",
+    "text": "La cuillère explose en une pluie de paprika. Une odeur sucrée envahit la cuisine. Un robot-cuisinier entre par la fenêtre.",
+    "end": true
+  },
+
+  "mangue": {
+    "id": "mangue",
+    "text": "Une sauce rose envahit la pièce. L'hologramme sourit : 'Félicitation, ton dessert tropical est en route...'",
+    "end": true
+  },
+
+  "moutarde": {
+    "id": "moutarde",
+    "text": "Le sol tremble. Un plat explosif se forme lentement : un curry volcanique à la moutarde noire...",
+    "end": true
+  },
+
+  "champignon": {
+    "id": "champignon",
+    "text": "Le chef dit : 'Choix audacieux.' La pièce devient une forêt, et une soupe mystique t'enveloppe doucement...",
+    "end": true
+  },
+
+  "chambrePlats": {
+    "id": "chambrePlats",
+    "text": "Tu entres dans une salle pleine de plats tournants sur des socles. Une voix demande : 'Lequel te représente le mieux ?'",
+    "end": true
+  }
+}
