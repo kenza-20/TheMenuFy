@@ -1,5 +1,7 @@
 const express = require('express');
 const router = express.Router();
+const Recipe = require('../models/Recipe'); 
+
 
 // Récupérer tous les ingrédients uniques depuis les recettes
 router.get('/ingredients', async (req, res) => {
