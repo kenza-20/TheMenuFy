@@ -45,6 +45,7 @@ const Dashboard = () => {
 
                     for (const item of record.items) {
                         const recipeRes = await axios.get(`http://localhost:3000/api/recipes/name/${item.name}`);
+                        console.log('name',recipeRes.data)
                         dishes.push({
                             name: item.name,
                             category: recipeRes.data.category,
